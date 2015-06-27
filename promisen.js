@@ -1,6 +1,7 @@
 /**
  * promisen.js - generates function works easy with Promise.
  *
+ * @module promisen
  * @copyright Yusuke Kawasaki
  * @license MIT
  * @see https://gist.github.com/kawanet/4933e5ae9f39942e7564
@@ -26,32 +27,35 @@
   promisen.createStack = createStack;
 
   /**
-   * It wraps a plain old function as a promise task function which returns a promise (thenable) object.
-   * Following types of tasks are available as well as functions.
+   * Generates a task function which returns a promise (thenable) object.
+   * It uses Promise if available, or uses "es6-promise" polyfill library instead.
+   * Following types of tasks are available:
    *
-   * * function
-   * * promise object
-   * * thenable object
-   * * any other objects
-   * * constant value
-   * * multiple values of above
+   * 1. function
+   * 2. promise object
+   * 3. thenable object
+   * 4. any other constant object or value
+   * 5. multiple values of above
    *
+   * @class promisen
+   * @function promisen
    * @param task {Function|Promise|thenable|*}
    * @returns {Function}
+   * @see https://www.npmjs.com/package/es6-promise
+   * @see promisen.series()
    * @example
    * var promisen = require("promisen");
    *
    * // wrap a single function
-   * var wrapped = promisen(function(value) {...});
+   * var wrapped = promisen(function() {...});
    * wrapped(value).then(function(result) {...});
    *
    * // composite multiple tasks
    * var joined = promisen(func, promise, thenable, object);
-   * joined(value).then(function(result){...});
+   * joined(value).then(function(result) {...});
    *
-   * // composite multiple tasks bound with the target
-   * var bound = promisen.call(target, func1, func2, func3);
-   * bound(value).then(function(result){...});
+   * // swtich to another Promise library such as Q
+   * promisen.Promise = require("q");
    */
 
   function promisen(task) {
@@ -81,9 +85,21 @@
   /**
    * creates a task function which runs multiple tasks in order.
    *
-   * @name promisen.series
+   * @class promisen
+   * @function series
    * @param tasks {Array|Array-like} list of tasks
    * @returns {Function}
+   * @example
+   * var promisen = require("promisen");
+   *
+   * // generate a task function
+   * var task = promisen.series([task1, task2, task3,...]);
+   *
+   * // execute it
+   * task(value).then(function(result) {...});
+   *
+   * // execute it with target object which is passed to every tasks
+   * task.call(target, value).then(function(result) {...});
    */
 
   function series(tasks) {
@@ -110,13 +126,33 @@
   }
 
   /**
-   * creates a task which runs a task assigned by a conditional task
+   * creates a task function which runs a task assigned by a conditional task
    *
-   * @name promisen.createConditional
+   * @class promisen
+   * @function createConditional
    * @param [condTask] {Function|Promise|thenable|*} condition task
    * @param [trueTask] {Function|Promise|thenable|*} task runs when true
    * @param [falseTask] {Function|Promise|thenable|*} task runs when false
    * @returns {Function}
+   * @example
+   * var promisen = require("promisen");
+   *
+   * // generate a task function
+   * var task = promisen.createConditional(condTask, trueTask, falseTask);
+   *
+   * // execute it
+   * task().then(function(result) {...});
+   *
+   * // execute it with target object which is passed to every tasks
+   * task.call(target).then(function(result) {...});
+   *
+   * // all three arguments are optional.
+   * var runWhenTrueTask = promisen.createConditional(null, trueTask);
+   * Promise.resolve(value).then(runWhenTrueTask).then(function(result) {...});
+   *
+   * // conditional task are also available in a series of promisen tasks
+   * var joined = promisen(task1, runWhenTrueTask, task2);
+   * joined().then(function(result) {...});
    */
 
   function createConditional(condTask, trueTask, falseTask) {
@@ -140,19 +176,25 @@
   /**
    * create a counter which has methods: incr(), decr(), get() and set()
    *
-   * @name promisen.createCounter
+   * @class promisen
+   * @function createCounter
    * @param [count] {Number} default count: 0
    * @param [step] {Number} default step: +1
    * @returns {Counter}
    * @example
-   * var createCounter = require("promisen").createCounter;
+   * var promisen = require("promisen");
    *
+   * // creates a conter
    * var counter = createCounter(123);
    * console.log("count: " + counter); // => count: 123
    * counter.incr(); // increment
    * console.log("count: " + counter); // => count: 124
    * counter.decr(); // decrement
    * console.log("count: " + counter); // => count: 123
+   *
+   * // methods are available in a series of promisen tasks
+   * var tasks = promisen(counter.set, task1, counter.incr, task2, counter.get, task3, counter.decr, task4);
+   * tasks(0);
    */
 
   function createCounter(count, step) {
@@ -167,50 +209,19 @@
     holder.set = setter;
     return holder;
 
-    /**
-     * increments the counter
-     *
-     * @name Counter.prototype.incr
-     * @param value {*} through to return
-     * @returns {Promise}
-     */
-
     function increment(value) {
       holder[0] += step;
       return resolve(value);
     }
-
-    /**
-     * decrements the counter
-     *
-     * @name Counter.prototype.decr
-     * @param value {*} through to return
-     * @returns {Promise}
-     */
 
     function decrement(value) {
       holder[0] -= step;
       return resolve(value);
     }
 
-    /**
-     * retrieve the number from the counter
-     *
-     * @name Counter.prototype.get
-     * @returns {Promise}
-     */
-
     function getter() {
       return resolve(holder[0]);
     }
-
-    /**
-     * copy the number to the counter
-     *
-     * @name Counter.prototype.set
-     * @param value {Number} number to set
-     * @returns {Promise}
-     */
 
     function setter(value) {
       holder[0] = value - 0 || 0;
@@ -221,34 +232,32 @@
   /**
    * creates a stack which has push() and pop() methods.
    *
-   * @name promisen.createCounter
-   * @param [stack] {Array|Array-like} default: []
+   * @class promisen
+   * @function createStack
    * @returns {Stack}
+   * @example
+   * var promisen = require("promisen");
+   *
+   * // creates a stack
+   * var stack = createStack();
+   * counter.push("X");
+   * console.log("length: " + stack.length); // => length: 1
+   * counter.pop().then(function(result) {...}); // => "X"
+   * console.log("length: " + stack.length); // => length: 0
+   *
+   * // methods are available in a series of promisen tasks
+   * var tasks = promisen(task1, stack.push, task2, stack.pop, task3);
+   * tasks();
    */
 
-  function createStack(stack) {
-    if (!stack) stack = [];
+  function createStack() {
+    var stack = [];
     var resolve = promisen();
-
-    /**
-     * copy the value to stack.
-     *
-     * @name Stack.prototype.push
-     * @param value {*} value to push
-     * @returns {Promise}
-     */
 
     stack.push = function(value) {
       Array.prototype.push.call(stack, value); // copy
       return resolve(value); // through
     };
-
-    /**
-     * retrieves the last value from stack.
-     *
-     * @name Stack.prototype.pop
-     * @returns {Promise}
-     */
 
     stack.pop = function() {
       var value = Array.prototype.pop.call(stack);
