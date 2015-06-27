@@ -1,0 +1,27 @@
+{
+  "name": "promisen",
+  "version": "0.0.1",
+  "description": "promisen.js - generates function works easy with Promise.",
+  "main": "promisen.js",
+  "scripts": {
+    "test": "make test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kawanet/promisen.git"
+  },
+  "author": "@kawanet",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/kawanet/promisen/issues"
+  },
+  "homepage": "https://github.com/kawanet/promisen",
+  "dependencies": {
+    "es6-promise": "^2.3.0"
+  },
+  "devDependencies": {
+    "jshint": "^2.8.0",
+    "mocha": "^2.2.5",
+    "uglifyjs": "^2.4.10"
+  }
+}
