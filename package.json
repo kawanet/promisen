@@ -1,14 +1,15 @@
 {
   "name": "promisen",
-  "version": "0.0.1",
-  "description": "promisen.js - generates function works easy with Promise.",
+  "version": "0.0.2",
+  "description": "promisen.js - generates function runs tasks with Promise",
   "main": "promisen.js",
   "scripts": {
+    "build": "make",
     "test": "make test"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/kawanet/promisen.git"
+    "url": "https://github.com/kawanet/promisen.git"
   },
   "author": "@kawanet",
   "license": "MIT",

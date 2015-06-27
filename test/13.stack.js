@@ -39,25 +39,6 @@ describe(TESTNAME + " testing", function() {
         assert.equal("X", value);
       }));
     });
-    it("createStack(ARRAY).push()", function(done) {
-      var array = ["X"]
-      var stack = createStack(array);
-      assert.equal(1, stack.length);
-      stack.push("Y");
-      assert.equal(2, stack.length);
-      stack.push("Z");
-      assert.equal(3, stack.length);
-      assert.equal("X", stack[0]);
-      assert.equal("Y", stack[1]);
-      assert.equal("Z", stack[2]);
-      stack.pop();
-      stack.pop();
-      assert.equal(1, stack.length);
-      stack.pop().then(wrap(done, function(value) {
-        assert.equal(0, stack.length);
-        assert.equal("X", value);
-      }));
-    });
     var OBJECT = {};
     it("createStack().push(OBJECT).then() => OBJECT", function(done) {
       createStack().push(OBJECT).then(wrap(done, function(value) {
