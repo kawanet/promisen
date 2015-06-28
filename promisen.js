@@ -178,7 +178,6 @@
    * @class promisen
    * @function createCounter
    * @param [count] {Number} default count: 0
-   * @param [step] {Number} default step: +1
    * @returns {Counter}
    * @example
    * var promisen = require("promisen");
@@ -196,9 +195,8 @@
    * tasks(0);
    */
 
-  function createCounter(count, step) {
+  function createCounter(count) {
     var holder = [count - 0 || 0];
-    holder.step = step - 0 || 1;
     holder.incr = increment;
     holder.decr = decrement;
     holder.get = getter;
@@ -207,12 +205,12 @@
   }
 
   function increment(value) {
-    this[0] += this.step;
+    this[0]++;
     return resolve(value);
   }
 
   function decrement(value) {
-    this[0] -= this.step;
+    this[0]--;
     return resolve(value);
   }
 

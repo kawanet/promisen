@@ -58,17 +58,6 @@ describe(TESTNAME + " testing", function() {
         assert.equal(10, value);
       }));
     });
-    it("createCounter(20,10).incr() => 20, 30,...", function(done) {
-      var counter = createCounter(20, 10);
-      assert.equal(20, Number(counter));
-      counter.incr();
-      assert.equal(30, Number(counter));
-      counter.decr();
-      assert.equal(20, Number(counter));
-      counter.get().then(wrap(done, function(value) {
-        assert.equal(20, value);
-      }));
-    });
     var OBJECT = {};
     it("createCounter().incr(OBJECT).then() => OBJECT", function(done) {
       createCounter().incr(OBJECT).then(wrap(done, function(value) {
@@ -95,4 +84,3 @@ function wrap(done, test) {
     }
   }
 }
-
