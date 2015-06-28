@@ -23,8 +23,10 @@
   // methods
   promisen.series = series;
   promisen.createConditional = createConditional;
-  promisen.createCounter = createCounter;
-  promisen.createStack = createStack;
+  promisen.createCounter = _Number;
+  promisen.createStack = _Array;
+  promisen.Array = _Array;
+  promisen.Number = _Number;
 
   /**
    * Generates a task function which returns a promise (thenable) object.
@@ -178,7 +180,7 @@
    * @class promisen
    * @function createCounter
    * @param [count] {Number} default count: 0
-   * @returns {Counter}
+   * @returns {promisen.Number}
    * @example
    * var promisen = require("promisen");
    *
@@ -195,32 +197,42 @@
    * tasks(0);
    */
 
-  function createCounter(count) {
-    var holder = [count - 0 || 0];
-    holder.incr = increment;
-    holder.decr = decrement;
-    holder.get = getter;
-    holder.set = setter;
-    return holder;
+  function _Number(count) {
+    if (!(this instanceof _Number)) return new _Number(count);
+    this[0] = count - 0 || 0;
   }
 
-  function increment(value) {
+  _Number.prototype = {
+    0: 0, // value holder
+    length: 1, // always hold one value
+    incr: _incr,
+    decr: _decr,
+    "get": _get,
+    "set": _set,
+    valueOf: _valueOf
+  };
+
+  function _incr(value) {
     this[0]++;
     return resolve(value);
   }
 
-  function decrement(value) {
+  function _decr(value) {
     this[0]--;
     return resolve(value);
   }
 
-  function getter() {
+  function _get() {
     return resolve(this[0]);
   }
 
-  function setter(value) {
+  function _set(value) {
     this[0] = value - 0 || 0;
     return resolve(value);
+  }
+
+  function _valueOf() {
+    return this[0];
   }
 
   /**
@@ -228,7 +240,7 @@
    *
    * @class promisen
    * @function createStack
-   * @returns {Stack}
+   * @returns {promisen.Array}
    * @example
    * var promisen = require("promisen");
    *
@@ -244,19 +256,22 @@
    * tasks();
    */
 
-  function createStack() {
-    var stack = [];
-    stack.push = push;
-    stack.pop = pop;
-    return stack;
+  function _Array() {
+    if (!(this instanceof _Array)) return new _Array();
   }
 
-  function push(value) {
+  _Array.prototype = {
+    length: 0,
+    push: _push,
+    pop: _pop
+  };
+
+  function _push(value) {
     Array.prototype.push.call(this, value); // copy
     return resolve(value); // through
   }
 
-  function pop() {
+  function _pop() {
     var value = Array.prototype.pop.call(this);
     return resolve(value);
   }
