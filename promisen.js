@@ -59,27 +59,26 @@
    */
 
   function promisen(task) {
-    var Promise = promisen.Promise;
     if (arguments.length > 1) return series(arguments);
     if (task instanceof Function) return executable;
-    if (task == null) return through;
-    if (arguments.length) return constant;
-    return through;
+    if (task == null) return resolve;
+    if (!arguments.length) return resolve;
+    task = promisen.Promise.resolve(task);
+    return constant;
 
     // return the constant value
     function constant() {
-      return Promise.resolve(task);
+      return task;
     }
 
     // return a result from the function
     function executable(value) {
-      return Promise.resolve(task.call(this, value));
+      return promisen.Promise.resolve(task.call(this, value));
     }
+  }
 
-    // through the value
-    function through(value) {
-      return Promise.resolve(value);
-    }
+  function resolve(value) {
+    return promisen.Promise.resolve(value);
   }
 
   /**
@@ -198,35 +197,32 @@
    */
 
   function createCounter(count, step) {
-    count = count - 0 || 0;
-    step = step - 0 || 1;
-
-    var resolve = promisen();
-    var holder = [count];
+    var holder = [count - 0 || 0];
+    holder.step = step - 0 || 1;
     holder.incr = increment;
     holder.decr = decrement;
     holder.get = getter;
     holder.set = setter;
     return holder;
+  }
 
-    function increment(value) {
-      holder[0] += step;
-      return resolve(value);
-    }
+  function increment(value) {
+    this[0] += this.step;
+    return resolve(value);
+  }
 
-    function decrement(value) {
-      holder[0] -= step;
-      return resolve(value);
-    }
+  function decrement(value) {
+    this[0] -= this.step;
+    return resolve(value);
+  }
 
-    function getter() {
-      return resolve(holder[0]);
-    }
+  function getter() {
+    return resolve(this[0]);
+  }
 
-    function setter(value) {
-      holder[0] = value - 0 || 0;
-      return resolve(value);
-    }
+  function setter(value) {
+    this[0] = value - 0 || 0;
+    return resolve(value);
   }
 
   /**
@@ -252,19 +248,19 @@
 
   function createStack() {
     var stack = [];
-    var resolve = promisen();
-
-    stack.push = function(value) {
-      Array.prototype.push.call(stack, value); // copy
-      return resolve(value); // through
-    };
-
-    stack.pop = function() {
-      var value = Array.prototype.pop.call(stack);
-      return resolve(value);
-    };
-
+    stack.push = push;
+    stack.pop = pop;
     return stack;
+  }
+
+  function push(value) {
+    Array.prototype.push.call(this, value); // copy
+    return resolve(value); // through
+  }
+
+  function pop() {
+    var value = Array.prototype.pop.call(this);
+    return resolve(value);
   }
 
 })("undefined" !== typeof module && module, "undefined" !== typeof window && window);
