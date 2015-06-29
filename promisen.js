@@ -24,12 +24,12 @@
   promisen.series = series;
   promisen.IF = promisen["if"] = IF;
   promisen.WHILE = promisen["while"] = WHILE;
-  promisen.stack = stack;
   promisen.number = number;
 
-  promisen.createConditoinal = IF;
-  promisen.createStack = stack;
-  promisen.createCounter = number;
+  // array operation
+  promisen.push = push;
+  promisen.pop = pop;
+  promisen.top = top;
 
   /**
    * Generates a task function which returns a promise (thenable) object.
@@ -264,46 +264,72 @@
   }
 
   /**
-   * creates a stack which has push() and pop() methods.
+   * creates a task function which stores a value into the array
    *
    * @class promisen
-   * @function stack
-   * @returns {promisen.stack}
+   * @function push
+   * @param array {Array|Array-like}
+   * @returns {Function}
    * @example
    * var promisen = require("promisen");
-   *
-   * // creates a stack
-   * var stack = promisen.stack();
-   * counter.push("X");
-   * console.log("length: " + stack.length); // => length: 1
-   * counter.pop().then(function(result) {...}); // => "X"
-   * console.log("length: " + stack.length); // => length: 0
-   *
-   * // methods are available in a series of promisen tasks
-   * var tasks = promisen(task1, stack.push, task2, stack.pop, task3);
-   * tasks();
+   * var stack = [];
+   * var task2 = promisen(task1, promisen.push(stack));
+   * task2().then(function() {...}); // stack.length == 2
    */
 
-  function stack() {
-    var holder = [];
-    holder.push = _push.bind(holder);
-    holder.pop = _pop.bind(holder);
-    return holder;
+  function push(array) {
+    return pushTask;
+
+    function pushTask(value) {
+      Array.prototype.push.call(array, value); // copy
+      return resolve(value); // through
+    }
   }
 
-  var stackPrototype = stack.prototype;
-  stackPrototype.length = 0;
-  stackPrototype.push = _push;
-  stackPrototype.pop = _pop;
+  /**
+   * creates a task function which fetches the last value on the array
+   *
+   * @class promisen
+   * @function pop
+   * @param array {Array|Array-like}
+   * @returns {Function}
+   * @example
+   * var promisen = require("promisen");
+   * var stack = ["foo", "bar"];
+   * var task2 = promisen(promisen.pop(stack), task1);
+   * task2().then(function() {...}); // stack.length == 1
+   */
 
-  function _push(value) {
-    Array.prototype.push.call(this, value); // copy
-    return resolve(value); // through
+  function pop(array) {
+    return popTask;
+
+    function popTask() {
+      var value = Array.prototype.pop.call(array);
+      return resolve(value);
+    }
   }
 
-  function _pop() {
-    var value = Array.prototype.pop.call(this);
-    return resolve(value);
+  /**
+   * creates a task function which inspects the last value on the array
+   *
+   * @class promisen
+   * @function push
+   * @param array {Array|Array-like}
+   * @returns {Function}
+   * @example
+   * var promisen = require("promisen");
+   * var stack = ["foo", "bar"];
+   * var task2 = promisen(promisen.top(stack), task1);
+   * task2().then(function() {...}); // stack.length == 2
+   */
+
+  function top(array) {
+    return topTask;
+
+    function topTask() {
+      var value = array[array.length - 1];
+      return resolve(value);
+    }
   }
 
 })("undefined" !== typeof module && module, "undefined" !== typeof window && window);

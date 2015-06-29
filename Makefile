@@ -18,7 +18,10 @@ $(DIST):
 $(DEST): $(SRC) $(DIST)
 	$(UGLIFYJS) $(SRC) -c -m -o $(DEST)
 
-test: jshint $(DEST)
+test: all jshint mocha
+	$(MOCHA) -R spec test/*.js
+
+mocha:
 	$(MOCHA) -R spec test/*.js
 
 jshint:

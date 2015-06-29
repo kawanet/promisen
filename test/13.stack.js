@@ -1,4 +1,4 @@
-#!/usr/bin/env ../node_modules/.bin/mocha -R spec
+#!/usr/bin/env mocha -R spec
 
 var assert = require("assert");
 
@@ -7,42 +7,48 @@ var promisen = require("../promisen");
 var Promise = require("es6-promise").Promise;
 
 describe(TESTNAME + " testing", function() {
-  describe("initialize:", function() {
-    it("promisen.stack()", function() {
-      var stack = promisen.stack();
-      assert.ok(stack.push instanceof Function);
-      assert.ok(stack.push().then instanceof Function);
-      assert.ok(stack.pop instanceof Function);
-      assert.ok(stack.pop().then instanceof Function);
-    });
-  });
+  describe("push(), pop(), top():", function() {
+    it("typeof", function() {
+      var stack = [];
+      assert.equal("function", typeof promisen.push);
+      assert.equal("function", typeof promisen.push());
+      assert.equal("function", typeof promisen.push(stack)().then);
 
-  describe("push(), pop()", function() {
-    it("promisen.stack().push()", function(done) {
-      var stack = promisen.stack();
-      assert.equal(0, stack.length);
-      stack.push("X");
-      assert.equal(1, stack.length);
-      stack.push("Y");
-      assert.equal(2, stack.length);
-      stack.push("Z");
-      assert.equal(3, stack.length);
-      assert.equal("X", stack[0]);
-      assert.equal("Y", stack[1]);
-      assert.equal("Z", stack[2]);
-      stack.pop();
-      stack.pop();
-      assert.equal(1, stack.length);
-      stack.pop().then(wrap(done, function(value) {
-        assert.equal(0, stack.length);
-        assert.equal("X", value);
+      assert.equal("function", typeof promisen.pop);
+      assert.equal("function", typeof promisen.pop());
+      assert.equal("function", typeof promisen.pop(stack)().then);
+
+      assert.equal("function", typeof promisen.top);
+      assert.equal("function", typeof promisen.top());
+      assert.equal("function", typeof promisen.top(stack)().then);
+    });
+
+    it("promisen.push()", function(done) {
+      var stack = ["X"];
+      var task = promisen.push(stack);
+      task("Y").then(wrap(done, function(value) {
+        assert.equal(2, stack.length);
+        assert.equal("X", stack[0]);
+        assert.equal("Y", stack[1]);
+        assert.equal("Y", value);
       }));
     });
-    var OBJECT = {};
-    it("promisen.stack().push(OBJECT).then() => OBJECT", function(done) {
-      promisen.stack().push(OBJECT).then(wrap(done, function(value) {
-        assert.equal(OBJECT, value);
-        assert.ok(OBJECT === value);
+
+    it("promisen.pop()", function(done) {
+      var stack = ["X", "Y"];
+      var task = promisen.pop(stack);
+      task().then(wrap(done, function(value) {
+        assert.equal(1, stack.length);
+        assert.equal("X", stack[0]);
+        assert.equal("Y", value);
+      }));
+    });
+
+    it("promisen.top()", function(done) {
+      var stack = ["X", "Y"];
+      promisen.top(stack)().then(wrap(done, function(value) {
+        assert.equal("Y", value);
+        assert.equal(2, stack.length);
       }));
     });
   });

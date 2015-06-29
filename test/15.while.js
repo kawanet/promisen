@@ -1,4 +1,4 @@
-#!/usr/bin/env ../node_modules/.bin/mocha -R spec
+#!/usr/bin/env mocha -R spec
 
 var assert = require("assert");
 
@@ -19,8 +19,8 @@ describe(TESTNAME + " testing", function() {
     // while ( condTask ) { runTask1; }
     it("promisen.while(condTask, runTask)", function(done) {
       var counter = promisen.number(5);
-      var stack = promisen.stack();
-      promisen.while(counter.decr, stack.push)("X").then(wrap(done, function(value) {
+      var stack = [];
+      promisen.while(counter.decr, promisen.push(stack))("X").then(wrap(done, function(value) {
         assert.equal(0, counter - 0);
         assert.equal(4, stack.length);
         // condTask's result is ignored.
@@ -33,8 +33,8 @@ describe(TESTNAME + " testing", function() {
     it("promisen.while(condTask, runTask1, runTask2)", function(done) {
       var counter1 = promisen.number(5);
       var counter2 = promisen.number(0);
-      var stack = promisen.stack();
-      promisen.while(counter1.decr, counter2.incr, stack.push)().then(wrap(done, function(value) {
+      var stack = [];
+      promisen.while(counter1.decr, counter2.incr, promisen.push(stack))().then(wrap(done, function(value) {
         assert.equal(0, counter1 - 0);
         assert.equal(4, counter2 - 0);
         assert.equal(4, stack.length);
@@ -45,8 +45,8 @@ describe(TESTNAME + " testing", function() {
     // do { runTask } while ( condTask )
     it("promisen.while(null, runTask, condTask)", function(done) {
       var counter = promisen.number(5);
-      var stack = promisen.stack();
-      promisen.while(null, stack.push, counter.decr)(true).then(wrap(done, function(value) {
+      var stack = [];
+      promisen.while(null, promisen.push(stack), counter.decr)(true).then(wrap(done, function(value) {
         assert.equal(0, counter - 0);
         assert.equal(5, stack.length);
         assert.equal(0, value);
