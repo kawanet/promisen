@@ -21,8 +21,12 @@
     "es6-promise": "^2.3.0"
   },
   "devDependencies": {
+    "bluebird": "^2.9.30",
     "jshint": "^2.8.0",
+    "kew": "^0.6.0",
     "mocha": "^2.2.5",
+    "q": "^1.4.1",
+    "rsvp": "^3.0.18",
     "uglify-js": "^2.4.23"
   }
 }
