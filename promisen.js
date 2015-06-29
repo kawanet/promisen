@@ -23,6 +23,7 @@
   // methods
   promisen.series = series;
   promisen.IF = promisen["if"] = IF;
+  promisen.WHILE = promisen["while"] = WHILE;
   promisen.stack = stack;
   promisen.number = number;
 
@@ -106,14 +107,13 @@
    */
 
   function series(tasks) {
-    var Promise = promisen.Promise;
     if (tasks == null) return promisen();
     tasks = Array.prototype.map.call(tasks, recursive);
     return composite;
 
     // composite multiple tasks
     function composite(value) {
-      return tasks.reduce(chain.bind(this), Promise.resolve(value));
+      return tasks.reduce(chain.bind(this), resolve(value));
     }
 
     // use the first argument only. ignore rest.
@@ -157,7 +157,7 @@
    * var joined = promisen(task1, runWhenTrueTask, task2);
    * joined().then(function(result) {...});
    *
-   * // use uglify compress (or UPPERCASE alias) for IE8
+   * // use uglify --compress (or UPPERCASE property name) for IE8
    * var task = promisen["if"](condTask, trueTask, falseTask);
    * var task = promisen.IF(condTask, trueTask, falseTask);
    */
@@ -177,6 +177,39 @@
       function switching(condition) {
         return condition ? trueFunc() : falseFunc();
       }
+    }
+  }
+
+  /**
+   * creates a task function which runs a task repeatedly while a conditional task returns true.
+   *
+   * @param condTask {Function|Promise|thenable|*} condition task
+   * @param runTask {Function|Promise|thenable|*} task runs while true
+   * @returns {Function}
+   * @example
+   * var promisen = require("promisen");
+   *
+   * // counter = 8; while (--counter) { runTask }
+   * var counter = promisen.number(8);
+   * var whileTask = promisen.while(counter.decr, runTask);
+   *
+   * // for (initTask; condTask; afterTask) { runTask }
+   * var forTask = promisen(initTask, promisen.while(condTask, runTask, afterTask));
+   *
+   * // do { runTask } while (condTask)
+   * var doWhileTask = promisen.while(null, condTask, runTask));
+   */
+
+  function WHILE(condTask, runTask) {
+    condTask = (condTask != null) ? promisen(condTask) : promisen();
+    var runTasks = Array.prototype.slice.call(arguments, 1);
+    runTasks.push(nextTask);
+    runTask = series(runTasks);
+    var whileTask = IF(condTask, runTask);
+    return whileTask;
+
+    function nextTask(value) {
+      return whileTask.call(this, value);
     }
   }
 
@@ -204,27 +237,21 @@
    */
 
   function number(count) {
-    if (!(this instanceof number)) return new number(count);
-    this[0] = count - 0 || 0;
+    var holder = [count - 0 || 0];
+    holder.length = 1; // always hold one value
+    holder.incr = _incr.bind(holder);
+    holder.decr = _decr.bind(holder);
+    holder.get = _get.bind(holder);
+    holder.set = _set.bind(holder);
+    return holder;
   }
 
-  var numberPrototype = number.prototype;
-  numberPrototype["0"] = 0; // value holder
-  numberPrototype.length = 1; // always hold one value
-  numberPrototype.incr = _incr;
-  numberPrototype.decr = _decr;
-  numberPrototype.get = _get;
-  numberPrototype.set = _set;
-  numberPrototype.valueOf = _valueOf;
-
-  function _incr(value) {
-    this[0]++;
-    return resolve(value);
+  function _incr() {
+    return resolve(++this[0]);
   }
 
-  function _decr(value) {
-    this[0]--;
-    return resolve(value);
+  function _decr() {
+    return resolve(--this[0]);
   }
 
   function _get() {
@@ -233,11 +260,7 @@
 
   function _set(value) {
     this[0] = value - 0 || 0;
-    return resolve(value);
-  }
-
-  function _valueOf() {
-    return this[0];
+    return resolve(this[0]);
   }
 
   /**
@@ -262,7 +285,10 @@
    */
 
   function stack() {
-    if (!(this instanceof stack)) return new stack();
+    var holder = [];
+    holder.push = _push.bind(holder);
+    holder.pop = _pop.bind(holder);
+    return holder;
   }
 
   var stackPrototype = stack.prototype;

@@ -57,17 +57,14 @@ describe(TESTNAME + " testing", function() {
         assert.equal(10, value);
       }));
     });
-    var OBJECT = {};
-    it("promisen.number().incr(OBJECT).then() => OBJECT", function(done) {
-      promisen.number().incr(OBJECT).then(wrap(done, function(value) {
-        assert.equal(OBJECT, value);
-        assert.ok(OBJECT === value);
+    it("promisen.number().incr().then() => 1", function(done) {
+      promisen.number().incr().then(wrap(done, function(value) {
+        assert.equal(1, value);
       }));
     });
-    it("promisen.number().decr(OBJECT).then() => OBJECT", function(done) {
-      promisen.number().decr(OBJECT).then(wrap(done, function(value) {
-        assert.equal(OBJECT, value);
-        assert.ok(OBJECT === value);
+    it("promisen.number().decr().then() => -1", function(done) {
+      promisen.number().decr().then(wrap(done, function(value) {
+        assert.equal(-1, value);
       }));
     });
   });
