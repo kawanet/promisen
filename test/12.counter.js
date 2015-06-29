@@ -3,14 +3,13 @@
 var assert = require("assert");
 
 var TESTNAME = __filename.replace(/^.*\//, "");
-var createCounter = require("../promisen").createCounter;
-
+var promisen = require("../promisen");
 var Promise = require("es6-promise").Promise;
 
 describe(TESTNAME + " testing", function() {
   describe("initialize:", function() {
-    it("createCounter()", function() {
-      var counter = createCounter();
+    it("promisen.number()", function() {
+      var counter = promisen.number();
       assert.ok(counter.incr instanceof Function);
       assert.ok(counter.incr().then instanceof Function);
       assert.ok(counter.decr instanceof Function);
@@ -23,21 +22,21 @@ describe(TESTNAME + " testing", function() {
   });
 
   describe("get(), set()", function() {
-    it("createCounter(10).get().then() => 10", function(done) {
-      createCounter(10).get().then(wrap(done, function(value) {
+    it("promisen.number(10).get().then() => 10", function(done) {
+      promisen.number(10).get().then(wrap(done, function(value) {
         assert.equal(10, value);
       }));
     });
-    it("createCounter().set(20).then() => 20", function(done) {
-      createCounter().set(20).then(wrap(done, function(value) {
+    it("promisen.number().set(20).then() => 20", function(done) {
+      promisen.number().set(20).then(wrap(done, function(value) {
         assert.equal(20, value);
       }));
     });
   });
 
   describe("incr(), decr()", function() {
-    it("createCounter().incr() => 1, 2,...", function(done) {
-      var counter = createCounter();
+    it("promisen.number().incr() => 1, 2,...", function(done) {
+      var counter = promisen.number();
       assert.equal(0, Number(counter));
       counter.incr();
       assert.equal(1, Number(counter));
@@ -47,8 +46,8 @@ describe(TESTNAME + " testing", function() {
         assert.equal(0, value);
       }));
     });
-    it("createCounter(10).incr() => 10, 11,...", function(done) {
-      var counter = createCounter(10);
+    it("promisen.number(10).incr() => 10, 11,...", function(done) {
+      var counter = promisen.number(10);
       assert.equal(10, Number(counter));
       counter.incr();
       assert.equal(11, Number(counter));
@@ -59,14 +58,14 @@ describe(TESTNAME + " testing", function() {
       }));
     });
     var OBJECT = {};
-    it("createCounter().incr(OBJECT).then() => OBJECT", function(done) {
-      createCounter().incr(OBJECT).then(wrap(done, function(value) {
+    it("promisen.number().incr(OBJECT).then() => OBJECT", function(done) {
+      promisen.number().incr(OBJECT).then(wrap(done, function(value) {
         assert.equal(OBJECT, value);
         assert.ok(OBJECT === value);
       }));
     });
-    it("createCounter().decr(OBJECT).then() => OBJECT", function(done) {
-      createCounter().decr(OBJECT).then(wrap(done, function(value) {
+    it("promisen.number().decr(OBJECT).then() => OBJECT", function(done) {
+      promisen.number().decr(OBJECT).then(wrap(done, function(value) {
         assert.equal(OBJECT, value);
         assert.ok(OBJECT === value);
       }));

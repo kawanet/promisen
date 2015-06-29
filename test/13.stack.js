@@ -3,14 +3,13 @@
 var assert = require("assert");
 
 var TESTNAME = __filename.replace(/^.*\//, "");
-var createStack = require("../promisen").createStack;
-
+var promisen = require("../promisen");
 var Promise = require("es6-promise").Promise;
 
 describe(TESTNAME + " testing", function() {
   describe("initialize:", function() {
-    it("createStack()", function() {
-      var stack = createStack();
+    it("promisen.stack()", function() {
+      var stack = promisen.stack();
       assert.ok(stack.push instanceof Function);
       assert.ok(stack.push().then instanceof Function);
       assert.ok(stack.pop instanceof Function);
@@ -19,8 +18,8 @@ describe(TESTNAME + " testing", function() {
   });
 
   describe("push(), pop()", function() {
-    it("createStack().push()", function(done) {
-      var stack = createStack();
+    it("promisen.stack().push()", function(done) {
+      var stack = promisen.stack();
       assert.equal(0, stack.length);
       stack.push("X");
       assert.equal(1, stack.length);
@@ -40,8 +39,8 @@ describe(TESTNAME + " testing", function() {
       }));
     });
     var OBJECT = {};
-    it("createStack().push(OBJECT).then() => OBJECT", function(done) {
-      createStack().push(OBJECT).then(wrap(done, function(value) {
+    it("promisen.stack().push(OBJECT).then() => OBJECT", function(done) {
+      promisen.stack().push(OBJECT).then(wrap(done, function(value) {
         assert.equal(OBJECT, value);
         assert.ok(OBJECT === value);
       }));

@@ -22,11 +22,13 @@
 
   // methods
   promisen.series = series;
-  promisen.createConditional = createConditional;
-  promisen.createCounter = _Number;
-  promisen.createStack = _Array;
-  promisen.Array = _Array;
-  promisen.Number = _Number;
+  promisen.IF = promisen["if"] = IF;
+  promisen.stack = stack;
+  promisen.number = number;
+
+  promisen.createConditoinal = IF;
+  promisen.createStack = stack;
+  promisen.createCounter = number;
 
   /**
    * Generates a task function which returns a promise (thenable) object.
@@ -130,7 +132,7 @@
    * creates a task function which runs a task assigned by a conditional task
    *
    * @class promisen
-   * @function createConditional
+   * @function if
    * @param [condTask] {Function|Promise|thenable|*} condition task
    * @param [trueTask] {Function|Promise|thenable|*} task runs when true
    * @param [falseTask] {Function|Promise|thenable|*} task runs when false
@@ -139,24 +141,28 @@
    * var promisen = require("promisen");
    *
    * // generate a task function
-   * var task = promisen.createConditional(condTask, trueTask, falseTask);
+   * var task = promisen.if(condTask, trueTask, falseTask);
    *
-   * // execute it
+   * // execute itl[pi?K  jk ln lml;/,   m /P/.[h
    * task().then(function(result) {...});
    *
    * // execute it with target object which is passed to every tasks
    * task.call(target).then(function(result) {...});
    *
    * // all three arguments are optional.
-   * var runWhenTrueTask = promisen.createConditional(null, trueTask);
+   * var runWhenTrueTask = promisen.if(null, trueTask);
    * Promise.resolve(value).then(runWhenTrueTask).then(function(result) {...});
    *
    * // conditional task are also available in a series of promisen tasks
    * var joined = promisen(task1, runWhenTrueTask, task2);
    * joined().then(function(result) {...});
+   *
+   * // use uglify compress (or UPPERCASE alias) for IE8
+   * var task = promisen["if"](condTask, trueTask, falseTask);
+   * var task = promisen.IF(condTask, trueTask, falseTask);
    */
 
-  function createConditional(condTask, trueTask, falseTask) {
+  function IF(condTask, trueTask, falseTask) {
     condTask = (condTask != null) ? promisen(condTask) : promisen();
     trueTask = (trueTask != null) ? promisen(trueTask) : promisen();
     falseTask = (falseTask != null) ? promisen(falseTask) : promisen();
@@ -185,7 +191,7 @@
    * var promisen = require("promisen");
    *
    * // creates a conter
-   * var counter = createCounter(123);
+   * var counter = promisen.number(123);
    * console.log("count: " + counter); // => count: 123
    * counter.incr(); // increment
    * console.log("count: " + counter); // => count: 124
@@ -197,20 +203,19 @@
    * tasks(0);
    */
 
-  function _Number(count) {
-    if (!(this instanceof _Number)) return new _Number(count);
+  function number(count) {
+    if (!(this instanceof number)) return new number(count);
     this[0] = count - 0 || 0;
   }
 
-  _Number.prototype = {
-    0: 0, // value holder
-    length: 1, // always hold one value
-    incr: _incr,
-    decr: _decr,
-    "get": _get,
-    "set": _set,
-    valueOf: _valueOf
-  };
+  var numberPrototype = number.prototype;
+  numberPrototype["0"] = 0; // value holder
+  numberPrototype.length = 1; // always hold one value
+  numberPrototype.incr = _incr;
+  numberPrototype.decr = _decr;
+  numberPrototype.get = _get;
+  numberPrototype.set = _set;
+  numberPrototype.valueOf = _valueOf;
 
   function _incr(value) {
     this[0]++;
@@ -239,13 +244,13 @@
    * creates a stack which has push() and pop() methods.
    *
    * @class promisen
-   * @function createStack
-   * @returns {promisen.Array}
+   * @function stack
+   * @returns {promisen.stack}
    * @example
    * var promisen = require("promisen");
    *
    * // creates a stack
-   * var stack = createStack();
+   * var stack = promisen.stack();
    * counter.push("X");
    * console.log("length: " + stack.length); // => length: 1
    * counter.pop().then(function(result) {...}); // => "X"
@@ -256,15 +261,14 @@
    * tasks();
    */
 
-  function _Array() {
-    if (!(this instanceof _Array)) return new _Array();
+  function stack() {
+    if (!(this instanceof stack)) return new stack();
   }
 
-  _Array.prototype = {
-    length: 0,
-    push: _push,
-    pop: _pop
-  };
+  var stackPrototype = stack.prototype;
+  stackPrototype.length = 0;
+  stackPrototype.push = _push;
+  stackPrototype.pop = _pop;
 
   function _push(value) {
     Array.prototype.push.call(this, value); // copy

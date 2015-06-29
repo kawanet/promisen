@@ -3,8 +3,7 @@
 var assert = require("assert");
 
 var TESTNAME = __filename.replace(/^.*\//, "");
-var createConditional = require("../promisen").createConditional;
-
+var promisen = require("../promisen");
 var Promise = require("es6-promise").Promise;
 
 describe(TESTNAME + " testing", function() {
@@ -12,16 +11,16 @@ describe(TESTNAME + " testing", function() {
   var TVALUES = [1, 0, true, false, "", {}, [], null, undefined];
 
   describe("initialize:", function() {
-    it("createConditional()", function() {
-      assert.ok(createConditional() instanceof Function);
-      assert.ok(createConditional()().then instanceof Function);
+    it("promisen.if()", function() {
+      assert.ok(promisen.if() instanceof Function);
+      assert.ok(promisen.if()().then instanceof Function);
     });
   });
 
   describe("through:", function() {
     TVALUES.forEach(function(tvalue) {
-      it("createConditional()(" + typestr(tvalue) + ").then()", function(done) {
-        createConditional()(tvalue).then(wrap(done, function(value) {
+      it("promisen.if()(" + typestr(tvalue) + ").then()", function(done) {
+        promisen.if()(tvalue).then(wrap(done, function(value) {
           assert.equal(tvalue, value);
           assert.ok(tvalue === value);
         }));
@@ -30,46 +29,46 @@ describe(TESTNAME + " testing", function() {
   });
 
   describe("conditional:", function() {
-    it("createConditional(true,1,2)().then() => 1", function(done) {
-      createConditional(true, 1, 2)().then(wrap(done, function(value) {
+    it("promisen.if(true,1,2)().then() => 1", function(done) {
+      promisen.if(true, 1, 2)().then(wrap(done, function(value) {
         assert.equal(1, value);
       }));
     });
-    it("createConditional(false,1,2)().then() => 2", function(done) {
-      createConditional(false, 1, 2)().then(wrap(done, function(value) {
+    it("promisen.if(false,1,2)().then() => 2", function(done) {
+      promisen.if(false, 1, 2)().then(wrap(done, function(value) {
         assert.equal(2, value);
       }));
     });
-    it("createConditional(null,1,2)(true).then() => 1", function(done) {
-      createConditional(null, 1, 2)(true).then(wrap(done, function(value) {
+    it("promisen.if(null,1,2)(true).then() => 1", function(done) {
+      promisen.if(null, 1, 2)(true).then(wrap(done, function(value) {
         assert.equal(1, value);
       }));
     });
-    it("createConditional(null,1,2)(false).then() => 2", function(done) {
-      createConditional(null, 1, 2)(false).then(wrap(done, function(value) {
+    it("promisen.if(null,1,2)(false).then() => 2", function(done) {
+      promisen.if(null, 1, 2)(false).then(wrap(done, function(value) {
         assert.equal(2, value);
       }));
     });
   });
 
   describe("async function:", function() {
-    it("createConditional(ASYNC_TRUE,1,2)().then() => 1", function(done) {
-      createConditional(async_function(true), 1, 2)().then(wrap(done, function(value) {
+    it("promisen.if(ASYNC_TRUE,1,2)().then() => 1", function(done) {
+      promisen.if(async_function(true), 1, 2)().then(wrap(done, function(value) {
         assert.equal(1, value);
       }));
     });
-    it("createConditional(ASYNC_FALSE,1,2)().then() => 2", function(done) {
-      createConditional(async_function(false), 1, 2)().then(wrap(done, function(value) {
+    it("promisen.if(ASYNC_FALSE,1,2)().then() => 2", function(done) {
+      promisen.if(async_function(false), 1, 2)().then(wrap(done, function(value) {
         assert.equal(2, value);
       }));
     });
-    it("createConditional(true,ASYNC_1,ASYNC_2)().then() => 1", function(done) {
-      createConditional(true, async_function(1), async_function(2))().then(wrap(done, function(value) {
+    it("promisen.if(true,ASYNC_1,ASYNC_2)().then() => 1", function(done) {
+      promisen.if(true, async_function(1), async_function(2))().then(wrap(done, function(value) {
         assert.equal(1, value);
       }));
     });
-    it("createConditional(false,ASYNC_1,ASYNC_2)().then() => 2", function(done) {
-      createConditional(false, async_function(1), async_function(2))().then(wrap(done, function(value) {
+    it("promisen.if(false,ASYNC_1,ASYNC_2)().then() => 2", function(done) {
+      promisen.if(false, async_function(1), async_function(2))().then(wrap(done, function(value) {
         assert.equal(2, value);
       }));
     });
