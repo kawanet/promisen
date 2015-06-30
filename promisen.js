@@ -37,6 +37,10 @@
   promisen.pop = pop;
   promisen.top = top;
 
+  // inpsect tasks
+  promisen.log = log;
+  promisen.warn = warn;
+
   /**
    * Generates a task function which returns a promise (thenable) object.
    * It uses Promise if available, or uses "es6-promise" polyfill library instead.
@@ -446,6 +450,64 @@
 
     function topTask() {
       var value = array[array.length - 1];
+      return resolve(value);
+    }
+  }
+
+  /**
+   * creates a task function which inspects value to console.warn()
+   *
+   * @class promisen
+   * @function warn
+   * @param [prefix] {String}
+   * @returns {Function}
+   * @example
+   * var promisen = require("promisen");
+   * var stack = ["foo", "bar"];
+   * var task3 = promisen(task1, promisen.warn("result:"), task2);
+   * task3().then(function() {...});
+   */
+
+  function warn(prefix) {
+    return warnTask;
+
+    function warnTask(value) {
+      if ("undefined" !== console && console.warn instanceof Function) {
+        if (prefix) {
+          console.warn(prefix, value);
+        } else {
+          console.warn(value);
+        }
+      }
+      return resolve(value);
+    }
+  }
+
+  /**
+   * creates a task function which inspects value to console.log()
+   *
+   * @class promisen
+   * @function log
+   * @param [prefix] {String}
+   * @returns {Function}
+   * @example
+   * var promisen = require("promisen");
+   * var stack = ["foo", "bar"];
+   * var task3 = promisen(task1, promisen.log("result:"), task2);
+   * task3().then(function() {...});
+   */
+
+  function log(prefix) {
+    return logTask;
+
+    function logTask(value) {
+      if ("undefined" !== console && console.log instanceof Function) {
+        if (prefix) {
+          console.log(prefix, value);
+        } else {
+          console.log(value);
+        }
+      }
       return resolve(value);
     }
   }
