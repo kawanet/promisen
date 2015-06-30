@@ -22,6 +22,7 @@
 
   // methods
   promisen.series = series;
+  promisen.eachSeries = eachSeries;
   promisen.IF = promisen["if"] = IF;
   promisen.WHILE = promisen["while"] = WHILE;
 
@@ -136,7 +137,7 @@
    *
    * @class promisen
    * @function if
-   * @param [condTask] {Function|Promise|thenable|*} condition task
+   * @param [condTask] {Boolean|Function|Promise|thenable|*} boolean or task returns boolean
    * @param [trueTask] {Function|Promise|thenable|*} task runs when true
    * @param [falseTask] {Function|Promise|thenable|*} task runs when false
    * @returns {Function}
@@ -186,7 +187,9 @@
   /**
    * creates a task function which runs a task repeatedly while a conditional task returns true.
    *
-   * @param condTask {Function|Promise|thenable|*} condition task
+   * @class promisen
+   * @function while
+   * @param condTask {Boolean|Function|Promise|thenable|*} boolean or task returns boolean
    * @param runTask {Function|Promise|thenable|*} task runs while true
    * @returns {Function}
    * @example
@@ -213,6 +216,34 @@
 
     function nextTask(value) {
       return whileTask.call(this, value);
+    }
+  }
+
+  /**
+   * creates a task function which runs task repeatedly for each of array values
+   *
+   * @class promisen
+   * @function eachSeries
+   * @param arrayTask {Array|Function|Promise|thenable|*} array or task returns an array
+   * @param runTask {Function|Promise|thenable|*} task runs repeatedly for each of array values
+   * @returns {Function}
+   */
+
+  function eachSeries(arrayTask, runTask) {
+    var resultStack = [];
+    arrayTask = (arrayTask != null) ? promisen(arrayTask) : promisen();
+    var runTasks = Array.prototype.slice.call(arguments, 1);
+    runTask = series(runTasks);
+    return series([arrayTask, loopTask.bind(this), resultStack]);
+
+    // composite multiple tasks
+    function loopTask(arrayResults) {
+      arrayResults = Array.prototype.map.call(arrayResults, wrap);
+      return series(arrayResults).call(this);
+    }
+
+    function wrap(value) {
+      return series([value, runTask, push(resultStack)]);
     }
   }
 
