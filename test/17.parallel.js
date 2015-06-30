@@ -10,12 +10,11 @@ var Promise = require("es6-promise").Promise;
 describe(TESTNAME + " testing", function() {
   var undefined = void 0;
   var TVALUES = [1, 0, true, false, "", {}, [], null, undefined];
-  TVALUES = [1, "X"];
 
   describe("multiple values:", function() {
     TVALUES.forEach(function(tvalue) {
-      it("promisen.series([1,2,3," + typestr(tvalue) + "])(10).then()", function(done) {
-        promisen.series([1, 2, 3, tvalue])(10).then(wrap(done, function(array) {
+      it("promisen.parallel([1,2,3," + typestr(tvalue) + "])(10).then()", function(done) {
+        promisen.parallel([1, 2, 3, tvalue])(10).then(wrap(done, function(array) {
           assert.equal(4, array.length);
           assert.equal(1, array[0]);
           assert.equal(2, array[1]);
@@ -31,10 +30,10 @@ describe(TESTNAME + " testing", function() {
     });
   });
 
-  describe("series of functions:", function() {
+  describe("parallel of functions:", function() {
     // two sync
-    it("promisen.series([SYNC_FUNCTION,SYNC_FUNCTION])(10).then()", function(done) {
-      promisen.series([incr_function, incr_function])(10).then(wrap(done, function(array) {
+    it("promisen.parallel([SYNC_FUNCTION,SYNC_FUNCTION])(10).then()", function(done) {
+      promisen.parallel([incr_function, incr_function])(10).then(wrap(done, function(array) {
         assert.equal(2, array.length);
         assert.equal(11, array[0]);
         assert.equal(11, array[1]);
@@ -42,8 +41,8 @@ describe(TESTNAME + " testing", function() {
     });
 
     // one sync and one async
-    it("promisen.series([SYNC_FUNCTION,ASYNC_FUNCTION])(10).then()", function(done) {
-      promisen.series([incr_function, async_function])(10).then(wrap(done, function(array) {
+    it("promisen.parallel([SYNC_FUNCTION,ASYNC_FUNCTION])(10).then()", function(done) {
+      promisen.parallel([incr_function, async_function])(10).then(wrap(done, function(array) {
         assert.equal(2, array.length);
         assert.equal(11, array[0]);
         assert.equal(9, array[1]);
@@ -51,8 +50,8 @@ describe(TESTNAME + " testing", function() {
     });
 
     // two async
-    it("promisen.series([ASYNC_FUNCTION,ASYNC_FUNCTION])(10).then()", function(done) {
-      promisen.series([async_function, async_function])(10).then(wrap(done, function(array) {
+    it("promisen.parallel([ASYNC_FUNCTION,ASYNC_FUNCTION])(10).then()", function(done) {
+      promisen.parallel([async_function, async_function])(10).then(wrap(done, function(array) {
         assert.equal(2, array.length);
         assert.equal(9, array[0]);
         assert.equal(9, array[1]);
@@ -60,9 +59,9 @@ describe(TESTNAME + " testing", function() {
     });
 
     // check bound target
-    it("promisen.series([BOUND_FUNCTION,BOUND_FUNCTION]).call(OBJECT).then()", function(done) {
+    it("promisen.parallel([BOUND_FUNCTION,BOUND_FUNCTION]).call(OBJECT).then()", function(done) {
       var object = new AnObject();
-      promisen.series([bind_target, bind_target]).call(object, 10).then(wrap(done, function(array) {
+      promisen.parallel([bind_target, bind_target]).call(object, 10).then(wrap(done, function(array) {
         assert.equal(2, array.length);
         assert.equal("AnObject", array[0]);
         assert.equal("AnObject", array[1]);
@@ -71,29 +70,29 @@ describe(TESTNAME + " testing", function() {
   });
 
   describe("invalid arguments:", function(done) {
-    it("promisen.series()", function() {
-      var task = promisen.series(); // empty task
+    it("promisen.parallel()", function() {
+      var task = promisen.parallel(); // empty task
       assert.equal("function", typeof task);
       task("X").then(wrap(done, function(array) {
         assert.equal(0, array.length);
       }));
     });
-    it("promisen.series(null)", function(done) {
-      var task = promisen.series(null); // empty task
+    it("promisen.parallel(null)", function(done) {
+      var task = promisen.parallel(null); // empty task
       assert.equal("function", typeof task);
       task("Y").then(wrap(done, function(array) {
         assert.equal(0, array.length);
       }));
     });
-    it("promisen.series(0)", function(done) {
-      var task = promisen.series(0);
+    it("promisen.parallel(0)", function(done) {
+      var task = promisen.parallel(0);
       assert.equal("function", typeof task);
       task("Z").then(wrap(done, function(array) {
         assert.equal(0, array.length);
       }));
     });
-    it("promisen.series(1)", function(done) {
-      var task = promisen.series(1);
+    it("promisen.parallel(1)", function(done) {
+      var task = promisen.parallel(1);
       assert.equal("function", typeof task);
       task("W").then(wrap(done, function(array) {
         assert.equal(0, array.length);

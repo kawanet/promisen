@@ -46,17 +46,43 @@ function test(name, loader) {
       assert.ok(promisen()().then instanceof Function); // thenable
     });
 
-    it("promisen(FUNCTION)(1).then()", function(done) {
+    it("promisen.waterfall([SYNC_TASK, SYNC_TASK])(1).then()", function(done) {
       promisen.Promise = PromiseClass;
-      promisen(double_function)(1).then(wrap(done, function(value) {
-        assert.equal(2, value);
+      promisen.waterfall([syncTask, syncTask])(1).then(wrap(done, function(value) {
+        assert.equal(4, value);
+      }));
+    });
+
+    it("promisen.series([ASYNC_TASK, ASYNC_TASK])(1).then()", function(done) {
+      promisen.Promise = PromiseClass;
+      promisen.series([asyncTask, asyncTask])(1).then(wrap(done, function(array) {
+        assert.equal(2, array.length);
+        assert.equal(2, array[0]);
+        assert.equal(2, array[1]);
+      }));
+    });
+
+    it("promisen.parallel([ASYNC_TASK, ASYNC_TASK])(1).then()", function(done) {
+      promisen.Promise = PromiseClass;
+      promisen.parallel([asyncTask, asyncTask])(1).then(wrap(done, function(array) {
+        assert.equal(2, array.length);
+        assert.equal(2, array[0]);
+        assert.equal(2, array[1]);
       }));
     });
   });
 }
 
-function double_function(value) {
+function syncTask(value) {
   return value * 2;
+}
+
+function asyncTask(value) {
+  return new Promise(function(resolve) {
+    setTimeout(function() {
+      return resolve(value * 2);
+    }, 100);
+  });
 }
 
 function wrap(done, test) {

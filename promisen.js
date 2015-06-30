@@ -21,7 +21,9 @@
   promisen.Promise = polyfill ? require("es6-promise").Promise : Promise;
 
   // methods
+  promisen.waterfall = waterfall;
   promisen.series = series;
+  promisen.parallel = parallel;
   promisen.eachSeries = eachSeries;
   promisen.IF = promisen["if"] = IF;
   promisen.WHILE = promisen["while"] = WHILE;
@@ -51,7 +53,7 @@
    * @param task {Function|Promise|thenable|*}
    * @returns {Function}
    * @see https://www.npmjs.com/package/es6-promise
-   * @see promisen.series()
+   * @see promisen.waterfall()
    * @example
    * var promisen = require("promisen");
    *
@@ -68,16 +70,15 @@
    */
 
   function promisen(task) {
-    if (arguments.length > 1) return series(arguments);
+    if (arguments.length > 1) return waterfall(arguments);
     if (task instanceof Function) return executable;
     if (task == null) return resolve;
     if (!arguments.length) return resolve;
-    task = promisen.Promise.resolve(task);
     return constant;
 
     // return the constant value
     function constant() {
-      return task;
+      return promisen.Promise.resolve(task);
     }
 
     // return a result from the function
@@ -94,6 +95,47 @@
    * creates a task function which runs multiple tasks in order.
    *
    * @class promisen
+   * @function waterfall
+   * @param tasks {Array|Array-like} list of tasks
+   * @returns {Function}
+   * @example
+   * var promisen = require("promisen");
+   *
+   * // generate a task function
+   * var task = promisen.waterfall([task1, task2, task3,...]);
+   *
+   * // execute it
+   * task(value).then(function(result) {...});
+   *
+   * // execute it with target object which is passed to every tasks
+   * task.call(target, value).then(function(result) {...});
+   */
+
+  function waterfall(tasks) {
+    if (tasks === null) return promisen(tasks);
+    if (tasks == null) return promisen();
+    tasks = Array.prototype.map.call(tasks, wrap);
+    return composite;
+
+    // composite multiple tasks
+    function composite(value) {
+      return tasks.reduce(chain.bind(this), resolve(value));
+    }
+
+    function wrap(task) {
+      return (task != null) && promisen(task);
+    }
+
+    // chain tasks
+    function chain(promise, func) {
+      return func ? promise.then(func.bind(this)) : promise;
+    }
+  }
+
+  /**
+   * creates a task function which runs multiple tasks in order.
+   *
+   * @class promisen
    * @function series
    * @param tasks {Array|Array-like} list of tasks
    * @returns {Function}
@@ -104,31 +146,63 @@
    * var task = promisen.series([task1, task2, task3,...]);
    *
    * // execute it
-   * task(value).then(function(result) {...});
+   * task(value).then(function(array) {...}); // array of results
    *
    * // execute it with target object which is passed to every tasks
    * task.call(target, value).then(function(result) {...});
    */
 
   function series(tasks) {
-    if (tasks == null) return promisen();
-    tasks = Array.prototype.map.call(tasks, recursive);
-    return composite;
+    if (tasks == null) return promisen([]);
+    var stack = [];
+    var result = [];
+    tasks = Array.prototype.map.call(tasks, wrap);
+    tasks = waterfall(tasks);
+    return waterfall([push(stack), tasks, result]);
 
-    // composite multiple tasks
-    function composite(value) {
-      return tasks.reduce(chain.bind(this), resolve(value));
+    // use the first argument only. ignore rest.
+    function wrap(task) {
+      return waterfall([top(stack), task, push(result)]);
+    }
+  }
+
+  /**
+   * creates a task function which runs multiple tasks in parallel.
+   *
+   * @class promisen
+   * @function parallel
+   * @param tasks {Array|Array-like} list of tasks
+   * @returns {Function}
+   * @example
+   * var promisen = require("promisen");
+   *
+   * // generate a task function
+   * var task = promisen.parallel([task1, task2, task3,...]);
+   *
+   * // execute it
+   * task(value).then(function(array) {...}); // array of results
+   *
+   * // execute it with target object which is passed to every tasks
+   * task.call(target, value).then(function(result) {...});
+   */
+
+  function parallel(tasks) {
+    if (tasks == null) return promisen([]);
+    tasks = Array.prototype.map.call(tasks, wrap);
+    return all;
+
+    function all(value) {
+      var boundTasks = Array.prototype.map.call(tasks, run.bind(this, value));
+      return promisen.Promise.all(boundTasks);
     }
 
     // use the first argument only. ignore rest.
-    function recursive(task) {
-      if ("undefined" === typeof task || task === null) return null;
+    function wrap(task) {
       return promisen(task);
     }
 
-    // chain tasks
-    function chain(promise, func) {
-      return func ? promise.then(func.bind(this)) : promise;
+    function run(value, func) {
+      return func.call(this, value);
     }
   }
 
@@ -157,7 +231,7 @@
    * var runWhenTrueTask = promisen.if(null, trueTask);
    * Promise.resolve(value).then(runWhenTrueTask).then(function(result) {...});
    *
-   * // conditional task are also available in a series of promisen tasks
+   * // conditional task are also available in a waterfall of promisen tasks
    * var joined = promisen(task1, runWhenTrueTask, task2);
    * joined().then(function(result) {...});
    *
@@ -210,7 +284,7 @@
     condTask = (condTask != null) ? promisen(condTask) : promisen();
     var runTasks = Array.prototype.slice.call(arguments, 1);
     runTasks.push(nextTask);
-    runTask = series(runTasks);
+    runTask = waterfall(runTasks);
     var whileTask = IF(condTask, runTask);
     return whileTask;
 
@@ -233,17 +307,17 @@
     var resultStack = [];
     arrayTask = (arrayTask != null) ? promisen(arrayTask) : promisen();
     var runTasks = Array.prototype.slice.call(arguments, 1);
-    runTask = series(runTasks);
-    return series([arrayTask, loopTask.bind(this), resultStack]);
+    runTask = waterfall(runTasks);
+    return waterfall([arrayTask, loopTask, resultStack]);
 
     // composite multiple tasks
     function loopTask(arrayResults) {
       arrayResults = Array.prototype.map.call(arrayResults, wrap);
-      return series(arrayResults).call(this);
+      return waterfall(arrayResults).call(this);
     }
 
     function wrap(value) {
-      return series([value, runTask, push(resultStack)]);
+      return waterfall([value, runTask, push(resultStack)]);
     }
   }
 
