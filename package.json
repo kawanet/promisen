@@ -1,6 +1,6 @@
 {
   "name": "promisen",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "promisen.js - generates function runs tasks with Promise",
   "main": "promisen.js",
   "scripts": {
