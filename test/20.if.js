@@ -11,7 +11,7 @@ describe(TESTNAME + " testing", function() {
   var TVALUES = [1, 0, true, false, "", {}, [], null, undefined];
 
   describe("initialize:", function() {
-    it("promisen.if()", function() {
+    it("typeof:", function() {
       assert.ok(promisen.if() instanceof Function);
       assert.ok(promisen.if()().then instanceof Function);
     });
@@ -73,6 +73,33 @@ describe(TESTNAME + " testing", function() {
       }));
     });
   });
+
+  describe("target binding:", function() {
+    var store = [];
+
+    // check bound target
+    it("promisen.if(TASK).call(OBJECT).then()", function(done) {
+      promisen.if(BOUND_TASK).call(new Object1()).then(wrap(done, function() {
+        assert.equal("Object1", store[0]);
+      }));
+    });
+
+    it("promisen.if(true,TASK).call(OBJECT).then()", function(done) {
+      promisen.if(true, BOUND_TASK).call(new Object2()).then(wrap(done, function() {
+        assert.equal("Object2", store[0]);
+      }));
+    });
+
+    it("promisen.if(false,null,TASK).call(OBJECT).then()", function(done) {
+      promisen.if(false, null, BOUND_TASK).call(new Object3()).then(wrap(done, function() {
+        assert.equal("Object3", store[0]);
+      }));
+    });
+
+    function BOUND_TASK() {
+      store[0] = this.constructor.name;
+    }
+  });
 });
 
 function async_function(value) {
@@ -81,6 +108,18 @@ function async_function(value) {
       return resolve(value);
     }, 1);
   });
+}
+
+function Object1() {
+
+}
+
+function Object2() {
+
+}
+
+function Object3() {
+
 }
 
 function typestr(tvalue) {
