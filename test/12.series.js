@@ -10,7 +10,6 @@ var Promise = require("es6-promise").Promise;
 describe(TESTNAME + " testing", function() {
   var undefined = void 0;
   var TVALUES = [1, 0, true, false, "", {}, [], null, undefined];
-  TVALUES = [1, "X"];
 
   describe("multiple values:", function() {
     TVALUES.forEach(function(tvalue) {
