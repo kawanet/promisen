@@ -24,9 +24,12 @@
   promisen.series = series;
   promisen.IF = promisen["if"] = IF;
   promisen.WHILE = promisen["while"] = WHILE;
-  promisen.number = number;
 
-  // array operation
+  // counter operations
+  promisen.incr = incr;
+  promisen.decr = decr;
+
+  // array operations
   promisen.push = push;
   promisen.pop = pop;
   promisen.top = top;
@@ -214,53 +217,63 @@
   }
 
   /**
-   * create a counter which has methods: incr(), decr(), get() and set()
+   * creates a task function which increments a counter.
    *
    * @class promisen
-   * @function createCounter
-   * @param [count] {Number} default count: 0
-   * @returns {promisen.Number}
+   * @function incr
+   * @param array {Array|Array-like} counter holder
+   * @returns {Function}
    * @example
    * var promisen = require("promisen");
    *
-   * // creates a conter
-   * var counter = promisen.number(123);
+   * var counter = [123];
    * console.log("count: " + counter); // => count: 123
-   * counter.incr(); // increment
-   * console.log("count: " + counter); // => count: 124
-   * counter.decr(); // decrement
-   * console.log("count: " + counter); // => count: 123
+   * var incrTask = counter.incr();
+   * incrTask().then(function(value) {...}); // => count: 124
    *
-   * // methods are available in a series of promisen tasks
-   * var tasks = promisen(counter.set, task1, counter.incr, task2, counter.get, task3, counter.decr, task4);
-   * tasks(0);
+   * // incrTask is available in a series of tasks.
+   * var task = promisen(otherTask, incrTask);
    */
 
-  function number(count) {
-    var holder = [count - 0 || 0];
-    holder.length = 1; // always hold one value
-    holder.incr = _incr.bind(holder);
-    holder.decr = _decr.bind(holder);
-    holder.get = _get.bind(holder);
-    holder.set = _set.bind(holder);
-    return holder;
+  function incr(array) {
+    return incrTask;
+
+    function incrTask() {
+      if (!array.length) {
+        Array.prototype.push.call(array, 0 | 0);
+      }
+      return resolve(++array[array.length - 1]);
+    }
   }
 
-  function _incr() {
-    return resolve(++this[0]);
-  }
+  /**
+   * creates a task function which decrements a counter.
+   *
+   * @class promisen
+   * @function decr
+   * @param array {Array|Array-like} counter holder
+   * @returns {Function}
+   * @example
+   * var promisen = require("promisen");
+   *
+   * var counter = [123];
+   * console.log("count: " + counter); // => count: 123
+   * var decrTask = counter.decr();
+   * decrTask().then(function(value) {...}); // => count: 122
+   *
+   * // decrTask is available in a series of tasks.
+   * var task = promisen(otherTask, decrTask);
+   */
 
-  function _decr() {
-    return resolve(--this[0]);
-  }
+  function decr(array) {
+    return decrTask;
 
-  function _get() {
-    return resolve(this[0]);
-  }
-
-  function _set(value) {
-    this[0] = value - 0 || 0;
-    return resolve(this[0]);
+    function decrTask() {
+      if (!array.length) {
+        Array.prototype.push.call(array, 0 | 0);
+      }
+      return resolve(--array[array.length - 1]);
+    }
   }
 
   /**
