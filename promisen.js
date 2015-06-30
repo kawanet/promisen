@@ -24,6 +24,7 @@
   promisen.waterfall = waterfall;
   promisen.series = series;
   promisen.parallel = parallel;
+  promisen.each = each;
   promisen.eachSeries = eachSeries;
   promisen.IF = promisen["if"] = IF;
   promisen.WHILE = promisen["while"] = WHILE;
@@ -298,30 +299,66 @@
   }
 
   /**
-   * creates a task function which runs task repeatedly for each of array values
+   * creates a task function which runs task repeatedly for each of array values in order
    *
    * @class promisen
    * @function eachSeries
    * @param arrayTask {Array|Function|Promise|thenable|*} array or task returns an array
    * @param runTask {Function|Promise|thenable|*} task runs repeatedly for each of array values
    * @returns {Function}
+   * @example
+   * var promisen = require("promisen");
+   *
+   * var task2 = promisen.eachSeries([1, 2, 3], task1);
+   * task2.call(target).then(function() {...});
    */
 
   function eachSeries(arrayTask, runTask) {
-    var resultStack = [];
     arrayTask = (arrayTask != null) ? promisen(arrayTask) : promisen();
     var runTasks = Array.prototype.slice.call(arguments, 1);
     runTask = waterfall(runTasks);
-    return waterfall([arrayTask, loopTask, resultStack]);
+    return waterfall([arrayTask, loopTask]);
 
     // composite multiple tasks
     function loopTask(arrayResults) {
       arrayResults = Array.prototype.map.call(arrayResults, wrap);
-      return waterfall(arrayResults).call(this);
+      return series(arrayResults).call(this);
     }
 
     function wrap(value) {
-      return waterfall([value, runTask, push(resultStack)]);
+      return waterfall([value, runTask]);
+    }
+  }
+
+  /**
+   * creates a task function which runs task repeatedly for each of array values in parallel
+   *
+   * @class promisen
+   * @function each
+   * @param arrayTask {Array|Function|Promise|thenable|*} array or task returns an array
+   * @param runTask {Function|Promise|thenable|*} task runs repeatedly for each of array values
+   * @returns {Function}
+   * @example
+   * var promisen = require("promisen");
+   *
+   * var task2 = promisen.each([1, 2, 3], task1);
+   * task2.call(target).then(function() {...});
+   */
+
+  function each(arrayTask, runTask) {
+    arrayTask = (arrayTask != null) ? promisen(arrayTask) : promisen();
+    var runTasks = Array.prototype.slice.call(arguments, 1);
+    runTask = waterfall(runTasks);
+    return waterfall([arrayTask, loopTask]);
+
+    // composite multiple tasks
+    function loopTask(arrayResults) {
+      arrayResults = Array.prototype.map.call(arrayResults, wrap);
+      return parallel(arrayResults).call(this);
+    }
+
+    function wrap(value) {
+      return waterfall([value, runTask]);
     }
   }
 
