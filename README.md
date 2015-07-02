@@ -1,8 +1,8 @@
 # promisen.js
 
-promisen.js - generates function runs tasks with Promise
+promisen.js creates promise-returning functions. ready for ES6 Promise.
 
-## USAGE
+### Usage
 
 ```js
 var promisen = require("promisen");
@@ -12,7 +12,13 @@ var joinedTask = promisen(func, promise, thenable, object);
 joinedTask(initialValue).then(function(result) {...});
 ```
 
-## BROWSER BUILD
+### For Node.js
+
+```sh
+npm install --save promisen
+```
+
+### For Browser
 
 Minified version of promisen.min.js does NOT include es6-promise.min.js.
 It is required for browsers which does NOT implement Promise. 
@@ -22,16 +28,20 @@ It is required for browsers which does NOT implement Promise.
 <script src="https://raw.githubusercontent.com/kawanet/promisen/master/dist/promisen.min.js"></script>
 ```
 
-## REPOSITORY
+### Repository
 
-https://github.com/kawanet/promisen
+- https://github.com/kawanet/promisen
 
-## SEE ALSO
+### Documentation
+
+- http://kawanet.github.io/promisen/module-promisen.html
+
+### See Also
 
 - https://www.npmjs.com/package/es6-promise
 - https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_Objects/Promise
 
-## LICENSE
+### License
 
 The MIT License (MIT)
 

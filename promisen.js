@@ -1,10 +1,11 @@
 /**
- * promisen.js - generates function works easy with Promise.
+ * promisen.js creates promise-returning functions. ready for ES6 Promise.
  *
  * @module promisen
  * @copyright Yusuke Kawasaki
  * @license MIT
- * @see https://gist.github.com/kawanet/4933e5ae9f39942e7564
+ * @see https://github.com/kawanet/promisen
+ * @see http://kawanet.github.io/promisen/module-promisen.html
  */
 
 (function(module, window) {
@@ -85,7 +86,7 @@
   promisen.denodeify = denodeify;
 
   /**
-   * Generates a promise-returning function from plain function or objects below:
+   * creates a promise-returning function from plain function or objects below:
    *
    * 1. function
    * 2. promise object
@@ -257,7 +258,7 @@
    *
    * @class promisen
    * @function if
-   * @param [condTask] {Boolean|Function|Promise|thenable|*} boolean or task returns boolean
+   * @param [condTask] {Boolean|Function|Promise|thenable|*} boolean or function returns boolean
    * @param [trueTask] {Function|Promise|thenable|*} task runs when true
    * @param [falseTask] {Function|Promise|thenable|*} task runs when false
    * @returns {Function} promise-returning function
@@ -305,11 +306,11 @@
   }
 
   /**
-   * creates a promise-returning function which runs a task repeatedly while a conditional task returns true.
+   * creates a promise-returning function which runs a task repeatedly while the condition is true.
    *
    * @class promisen
    * @function while
-   * @param condTask {Boolean|Function|Promise|thenable|*} boolean or task returns boolean
+   * @param condTask {Boolean|Function|Promise|thenable|*} boolean or function returns boolean
    * @param runTask {Function|Promise|thenable|*} task runs while true
    * @returns {Function} promise-returning function
    * @example
@@ -323,7 +324,7 @@
    * var forTask = promisen(initTask, promisen.while(condTask, runTask, afterTask));
    *
    * // do { runTask } while (condTask)
-   * var doWhileTask = promisen.while(null, condTask, runTask));
+   * var doWhileTask = promisen.while(null, runTask, condTask));
    */
 
   function WHILE(condTask, runTask) {
@@ -344,7 +345,7 @@
    *
    * @class promisen
    * @function eachSeries
-   * @param arrayTask {Array|Function|Promise|thenable|*} array or task returns an array
+   * @param arrayTask {Array|Function|Promise|thenable|*} array or function returns an array
    * @param runTask {Function|Promise|thenable|*} task runs repeatedly for each of array values
    * @returns {Function} promise-returning function
    * @example
@@ -376,7 +377,7 @@
    *
    * @class promisen
    * @function each
-   * @param arrayTask {Array|Function|Promise|thenable|*} array or task returns an array
+   * @param arrayTask {Array|Function|Promise|thenable|*} array or function returns an array
    * @param runTask {Function|Promise|thenable|*} task runs repeatedly for each of array values
    * @returns {Function} promise-returning function
    * @example
