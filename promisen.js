@@ -74,6 +74,10 @@
   // lock
   promisen.single = single;
 
+  // nodeify / denodeify
+  promisen.nodeify = nodeify;
+  promisen.denodeify = denodeify;
+
   /**
    * Generates a task function which returns a promise (thenable) object.
    * It uses Promise if available, or uses "es6-promise" polyfill library instead.
@@ -670,6 +674,75 @@
       mess += ": " + Math.round(duration) + " msec exceeded";
       return reject(Error(mess));
     }
+  }
+
+  /**
+   * creates a Node.js-style function from a promise-returning function or any object.
+   *
+   * @class promisen
+   * @function nodeify
+   * @param task {Function|Promise|thenable|*} promise-returning function or any object
+   * @returns {Function} Node.js-style function
+   * @example
+   * var promisen = require("promisen");
+   *
+   * var task = nodeify(func);
+   * task(value, function(err, res) {...});
+   *
+   * function func(value) {
+   *   return new Promise(function(resolve, reject) {...});
+   * }
+   */
+
+  function nodeify(task) {
+    if (!(task instanceof Function)) task = promisen(task);
+    return nodeifyTask;
+
+    function nodeifyTask(args, callback) {
+      args = Array.prototype.slice.call(arguments);
+      callback = (args[args.length - 1] instanceof Function) && args.pop();
+      if (!callback) callback = NOP;
+      return task.apply(this, args).then(onResolve, callback);
+
+      function onResolve(value) {
+        callback(null, value);
+      }
+    }
+  }
+
+  /**
+   * creates a promise-returning function from a Node.js-style function which requests a callback function at the last argument.
+   *
+   * @class promisen
+   * @function denodeify
+   * @param task {Function} Node.js-style function
+   * @returns {Function} promise-returning function
+   * @example
+   * var promisen = require("promisen");
+   *
+   * var task = denodeify(request.get.bind(request);
+   * task(req).then(function(value) {...}).catch(function(reason) {...});
+   */
+
+  function denodeify(task) {
+    return denodeifyTask;
+
+    function denodeifyTask(args) {
+      var that = this;
+      args = Array.prototype.slice.call(arguments);
+
+      return new promisen.Promise(function(resolve, reject) {
+        args.push(callback);
+        task.apply(that, args);
+
+        function callback(err, value) {
+          return err ? reject(err) : resolve(value);
+        }
+      });
+    }
+  }
+
+  function NOP() {
   }
 
 })("undefined" !== typeof module && module, "undefined" !== typeof window && window);
