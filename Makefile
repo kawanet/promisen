@@ -1,6 +1,7 @@
 #!/usr/bin/env bash -c make
 
 SRC=./promisen.js
+TESTS=./test/*.js
 DIST=./dist
 DEST=./dist/promisen.min.js
 JSHINT=./node_modules/.bin/jshint
@@ -21,9 +22,9 @@ $(DEST): $(SRC) $(DIST)
 test: all jshint mocha
 
 mocha:
-	$(MOCHA) -R spec test/*.js
+	$(MOCHA) -R spec $(TESTS)
 
 jshint:
-	$(JSHINT) $(SRC)
+	$(JSHINT) $(SRC) $(TESTS)
 
-.PHONY: all clean test jshint
+.PHONY: all clean test jshint mocha

@@ -68,5 +68,5 @@ function wrap(done, test) {
     } catch (e) {
       done(e);
     }
-  }
+  };
 }

@@ -8,14 +8,14 @@ var promisen = require("../promisen");
 var Promise = require("es6-promise").Promise;
 
 describe(TESTNAME + " testing", function() {
-  var undefined = void 0;
-  var TVALUES = [1, 0, true, false, "", {}, [], null, undefined];
+  var undef = void 0;
+  var TVALUES = [1, 0, true, false, "", {}, [], null, undef];
 
   describe("multiple values:", function() {
     TVALUES.forEach(function(tvalue) {
       it("promisen.waterfall([1,2,3," + typestr(tvalue) + "])().then()", function(done) {
         promisen.waterfall([1, 2, 3, tvalue])().then(wrap(done, function(value) {
-          if (tvalue === null || tvalue === undefined) {
+          if (tvalue === null || tvalue === undef) {
             assert.equal(3, value); // returns previous argument
           } else {
             assert.equal(tvalue, value);
@@ -117,7 +117,7 @@ function wrap(done, test) {
     } catch (e) {
       done(e);
     }
-  }
+  };
 }
 
 function AnObject() {

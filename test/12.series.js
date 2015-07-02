@@ -8,8 +8,8 @@ var promisen = require("../promisen");
 var Promise = require("es6-promise").Promise;
 
 describe(TESTNAME + " testing", function() {
-  var undefined = void 0;
-  var TVALUES = [1, 0, true, false, "", {}, [], null, undefined];
+  var undef = void 0;
+  var TVALUES = [1, 0, true, false, "", {}, [], null, undef];
 
   describe("multiple values:", function() {
     TVALUES.forEach(function(tvalue) {
@@ -19,6 +19,7 @@ describe(TESTNAME + " testing", function() {
           assert.equal(1, array[0]);
           assert.equal(2, array[1]);
           assert.equal(3, array[2]);
+          /*jshint eqnull:true*/
           if (tvalue == null) {
             assert.equal(10, array[3]);
           } else {
@@ -134,7 +135,7 @@ function wrap(done, test) {
     } catch (e) {
       done(e);
     }
-  }
+  };
 }
 
 function AnObject() {

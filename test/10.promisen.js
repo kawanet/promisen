@@ -8,8 +8,8 @@ var promisen = require("../promisen");
 var Promise = require("es6-promise").Promise;
 
 describe(TESTNAME + " testing", function() {
-  var undefined = void 0;
-  var TVALUES = [1, 0, true, false, "", {}, [], null, undefined];
+  var undef = void 0;
+  var TVALUES = [1, 0, true, false, "", {}, [], null, undef];
 
   describe("initialize:", function() {
     it("promisen()", function() {
@@ -33,8 +33,8 @@ describe(TESTNAME + " testing", function() {
     TVALUES.forEach(function(tvalue) {
       it("promisen(" + typestr(tvalue) + ")().then()", function(done) {
         promisen(tvalue)().then(wrap(done, function(value) {
-          if (tvalue === null || tvalue === undefined) {
-            assert.equal(undefined, value); // argument ignored
+          if (tvalue === null || tvalue === undef) {
+            assert.equal(undef, value); // argument ignored
           } else {
             assert.equal(tvalue, value);
             assert.ok(tvalue === value);
@@ -48,7 +48,7 @@ describe(TESTNAME + " testing", function() {
     TVALUES.forEach(function(tvalue) {
       it("promisen(1,2,3," + typestr(tvalue) + ")().then()", function(done) {
         promisen(1, 2, 3, tvalue)().then(wrap(done, function(value) {
-          if (tvalue === null || tvalue === undefined) {
+          if (tvalue === null || tvalue === undef) {
             assert.equal(3, value); // returns previous argument
           } else {
             assert.equal(tvalue, value);
@@ -105,8 +105,8 @@ describe(TESTNAME + " testing", function() {
     TVALUES.forEach(function(tvalue) {
       it("promisen(promisen(" + typestr(tvalue) + "))().then()", function(done) {
         promisen(promisen(tvalue))().then(wrap(done, function(value) {
-          if (tvalue === null || tvalue === undefined) {
-            assert.equal(undefined, value); // argument ignored
+          if (tvalue === null || tvalue === undef) {
+            assert.equal(undef, value); // argument ignored
           } else {
             assert.equal(tvalue, value);
             assert.ok(tvalue === value);
@@ -120,8 +120,8 @@ describe(TESTNAME + " testing", function() {
     TVALUES.forEach(function(tvalue) {
       it("promisen()().then(promisen(" + typestr(tvalue) + ")).then()", function(done) {
         promisen()().then(promisen(tvalue)).then(wrap(done, function(value) {
-          if (tvalue === null || tvalue === undefined) {
-            assert.equal(undefined, value); // argument ignored
+          if (tvalue === null || tvalue === undef) {
+            assert.equal(undef, value); // argument ignored
           } else {
             assert.equal(tvalue, value);
             assert.ok(tvalue === value);
@@ -133,8 +133,8 @@ describe(TESTNAME + " testing", function() {
     TVALUES.forEach(function(tvalue) {
       it("promisen()(" + typestr(tvalue) + ").then(promisen()).then()", function(done) {
         promisen()(tvalue).then(promisen()).then(wrap(done, function(value) {
-          if (tvalue === null || tvalue === undefined) {
-            assert.equal(undefined, value); // argument ignored
+          if (tvalue === null || tvalue === undef) {
+            assert.equal(undef, value); // argument ignored
           } else {
             assert.equal(tvalue, value);
             assert.ok(tvalue === value);
@@ -199,7 +199,7 @@ function wrap(done, test) {
     } catch (e) {
       done(e);
     }
-  }
+  };
 }
 
 function AnObject() {
