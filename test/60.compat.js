@@ -10,7 +10,7 @@ P.resolve = (new P()).resolve;
 
 describe(TESTNAME + " testing", function() {
   test("es6-promise:", function() {
-    return require("es6-promise").Promise
+    return require("es6-promise").Promise;
   });
   test("kew:", function() {
     return require("kew");
@@ -19,10 +19,16 @@ describe(TESTNAME + " testing", function() {
     return require("q").Promise;
   });
   test("bluebird:", function() {
-    return require("bluebird").Promise
+    return require("bluebird").Promise;
   });
   test("rsvp:", function() {
-    return require("rsvp").Promise
+    return require("rsvp").Promise;
+  });
+  test("lie:", function() {
+    return require("lie");
+  });
+  test("promiscuous:", function() {
+    return require("promiscuous");
   });
 });
 
@@ -45,7 +51,7 @@ function test(name, loader, skip) {
   if (skip) {
     name += " " + skip;
     desc = describe.skip;
-    promiseName = "(SKIP)"
+    promiseName = "(SKIP)";
   }
 
   desc(name, function() {
@@ -110,5 +116,5 @@ function wrap(done, test) {
     } catch (e) {
       done(e);
     }
-  }
+  };
 }
