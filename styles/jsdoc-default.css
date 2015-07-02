@@ -355,11 +355,11 @@ h3, h4 {
     margin-top: 50px;
 }
 
-h5 + dl, h5 + ul, .details .tag-source {
+h5 + dl, .details .tag-source {
     display: none;
 }
 
-h5, .description, .params, pre, .details, .param-desc, .param-desc + dl {
+h5, h5 + ul, .description, .params, pre, .details, .param-desc, .param-desc + dl {
     margin-left: 50px;
 }
 
