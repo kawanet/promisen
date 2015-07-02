@@ -18,6 +18,32 @@
 
   // use polifill or not
   var polyfill = ("undefined" === typeof Promise && "undefined" !== typeof require);
+
+  /**
+   * Native Promise object or Promise polyfill.
+   * "es6-promise" polyfill loaded per default in case no native Promise object ready.
+   * Some other libraries which have compatible interface with ES6 Promise are also available:
+   * Q, bluebird and RSVP are tested.
+   *
+   * @class promisen
+   * @member Promise {Promise}
+   * @static
+   * @example
+   * var promisen = require("promisen");
+   *
+   * // https://github.com/jakearchibald/es6-promise (default polyfill)
+   * promisen.Promise = require("es6-promise").Promise;
+   *
+   * // https://github.com/kriskowal/q
+   * promisen.Promise = require("q").Promise;
+   *
+   * // https://github.com/petkaantonov/bluebird
+   * promisen.Promise = require("bluebird").Promise;
+   *
+   * // https://github.com/tildeio/rsvp.js
+   * promisen.Promise = require("rsvp").Promise;
+   */
+
   promisen.Promise = polyfill ? require("es6-promise").Promise : Promise;
 
   // methods
@@ -41,6 +67,12 @@
   // inpsect tasks
   promisen.log = log;
   promisen.warn = warn;
+
+  // wait
+  promisen.wait = wait;
+
+  // lock
+  promisen.single = single;
 
   /**
    * Generates a task function which returns a promise (thenable) object.
@@ -69,9 +101,6 @@
    * // composite multiple tasks
    * var joined = promisen(func, promise, thenable, object);
    * joined(value).then(function(result) {...});
-   *
-   * // swtich to another Promise library such as Q
-   * promisen.Promise = require("q");
    */
 
   function promisen(task) {
@@ -94,6 +123,10 @@
 
   function resolve(value) {
     return promisen.Promise.resolve(value);
+  }
+
+  function reject(value) {
+    return promisen.Promise.reject(value);
   }
 
   /**
@@ -212,7 +245,7 @@
   }
 
   /**
-   * creates a task function which runs a task assigned by a conditional task
+   * creates a task function which runs a task assigned by a conditional task.
    *
    * @class promisen
    * @function if
@@ -299,7 +332,7 @@
   }
 
   /**
-   * creates a task function which runs task repeatedly for each of array values in order
+   * creates a task function which runs task repeatedly for each value of array in order.
    *
    * @class promisen
    * @function eachSeries
@@ -331,7 +364,7 @@
   }
 
   /**
-   * creates a task function which runs task repeatedly for each of array values in parallel
+   * creates a task function which runs task repeatedly for each value of array in parallel.
    *
    * @class promisen
    * @function each
@@ -423,7 +456,7 @@
   }
 
   /**
-   * creates a task function which stores a value into the array
+   * creates a task function which stores a value into the array.
    *
    * @class promisen
    * @function push
@@ -431,6 +464,7 @@
    * @returns {Function}
    * @example
    * var promisen = require("promisen");
+   *
    * var stack = [];
    * var task2 = promisen(task1, promisen.push(stack));
    * task2().then(function() {...}); // stack.length == 2
@@ -446,7 +480,7 @@
   }
 
   /**
-   * creates a task function which fetches the last value on the array
+   * creates a task function which fetches the last value on the array.
    *
    * @class promisen
    * @function pop
@@ -454,6 +488,7 @@
    * @returns {Function}
    * @example
    * var promisen = require("promisen");
+   *
    * var stack = ["foo", "bar"];
    * var task2 = promisen(promisen.pop(stack), task1);
    * task2().then(function() {...}); // stack.length == 1
@@ -469,7 +504,7 @@
   }
 
   /**
-   * creates a task function which inspects the last value on the array
+   * creates a task function which inspects the last value on the array.
    *
    * @class promisen
    * @function push
@@ -477,6 +512,7 @@
    * @returns {Function}
    * @example
    * var promisen = require("promisen");
+   *
    * var stack = ["foo", "bar"];
    * var task2 = promisen(promisen.top(stack), task1);
    * task2().then(function() {...}); // stack.length == 2
@@ -492,7 +528,7 @@
   }
 
   /**
-   * creates a task function which inspects value to console.warn()
+   * creates a task function which inspects value to console.warn() for debug purpose.
    *
    * @class promisen
    * @function warn
@@ -500,6 +536,7 @@
    * @returns {Function}
    * @example
    * var promisen = require("promisen");
+   *
    * var stack = ["foo", "bar"];
    * var task3 = promisen(task1, promisen.warn("result:"), task2);
    * task3().then(function() {...});
@@ -521,7 +558,7 @@
   }
 
   /**
-   * creates a task function which inspects value to console.log()
+   * creates a task function which inspects value to console.log() for debug purpose.
    *
    * @class promisen
    * @function log
@@ -529,6 +566,7 @@
    * @returns {Function}
    * @example
    * var promisen = require("promisen");
+   *
    * var stack = ["foo", "bar"];
    * var task3 = promisen(task1, promisen.log("result:"), task2);
    * task3().then(function() {...});
@@ -546,6 +584,91 @@
         }
       }
       return resolve(value);
+    }
+  }
+
+  /**
+   * creates a task function which does just sleep for given milliseconds.
+   *
+   * @class promisen
+   * @function wait
+   * @param msec {Number}
+   * @returns {Function}
+   * @example
+   * var promisen = require("promisen");
+   *
+   * var sleep = promisen.wait(1000); // 1 sec
+   * sleep(value).then(function(value) {...});
+   *
+   * // similar to below
+   * setTimeout(function() {...}, 1000);
+   */
+
+  function wait(msec) {
+    return waitTask;
+
+    function waitTask(value) {
+      var that = this;
+      return new promisen.Promise(function(resolve) {
+        setTimeout(function() {
+          resolve.call(that, value);
+        }, msec);
+      });
+    }
+  }
+
+  /**
+   * creates a task function which extends the given task with lock feature to run it in serial.
+   *
+   * @class promisen
+   * @function single
+   * @param task {Function} task to extend the lock feature
+   * @param timeout {Number} 1 minute per default
+   * @param interval {Number} 1% length of timeout
+   * @returns {Function}
+   * @example
+   * var promisen = require("promisen");
+   *
+   * var serialAjaxTask = promisen.single(ajaxTask, 10000); // 10 seconds
+   * serialAjaxTask(req).then(function(res) {...});
+   */
+
+  function single(task, timeout, interval) {
+    if (!timeout) timeout = 60 * 1000; // 1 minute
+    if (!interval) interval = Math.ceil(timeout / 100);
+    var mainTask = promisen.waterfall([task, unlockTask]);
+    var retryTask = promisen.waterfall([wait(interval), checkTask, singleTask]);
+    return singleTask;
+
+    function singleTask(value) {
+      if (singleTask.locked) {
+        // locked
+        return retryTask.call(this, value);
+      } else {
+        // unlocked
+        singleTask.locked = new Date();
+        return mainTask.call(this, value);
+      }
+    }
+
+    function unlockTask(value) {
+      delete singleTask.locked;
+      return value;
+    }
+
+    function checkTask(value) {
+      if (!singleTask.locked) return value;
+      var duration = new Date() - singleTask.locked;
+      if (duration < timeout) return value;
+
+      // force unlock as timeout
+      delete singleTask.locked;
+
+      // reject the current job
+      var mess = "timeout";
+      if (task.name) mess += " for " + task.name;
+      mess += ": " + Math.round(duration) + " msec exceeded";
+      return reject(Error(mess));
     }
   }
 

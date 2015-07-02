@@ -5,37 +5,47 @@ var assert = require("assert");
 var TESTNAME = __filename.replace(/^.*\//, "");
 var promisen = require("../promisen");
 
+var P = require("kew").Promise;
+P.resolve = (new P()).resolve;
+
 describe(TESTNAME + " testing", function() {
   test("es6-promise:", function() {
     return require("es6-promise").Promise
   });
   test("kew:", function() {
     return require("kew");
-  });
+  }, "(not compatible with ES6 Promise interface)");
   test("q:", function() {
-    return require("q")
+    return require("q").Promise;
   });
   test("bluebird:", function() {
-    return require("bluebird")
+    return require("bluebird").Promise
   });
   test("rsvp:", function() {
-    return require("rsvp")
+    return require("rsvp").Promise
   });
 });
 
-function test(name, loader) {
+function test(name, loader, skip) {
   var PromiseClass;
   var promiseConstructor;
   var promiseName;
   var desc = describe;
 
-  try {
-    PromiseClass = loader();
-    promiseConstructor = PromiseClass.resolve().constructor;
-    promiseName = promiseConstructor.name;
-  } catch (e) {
+  if (!skip) {
+    try {
+      PromiseClass = loader();
+      promiseConstructor = PromiseClass.resolve().constructor;
+      promiseName = promiseConstructor.name;
+    } catch (e) {
+      skip = e;
+    }
+  }
+
+  if (skip) {
+    name += " " + skip;
     desc = describe.skip;
-    name += " " + e;
+    promiseName = "(SKIP)"
   }
 
   desc(name, function() {
@@ -68,6 +78,13 @@ function test(name, loader) {
         assert.equal(2, array.length);
         assert.equal(2, array[0]);
         assert.equal(2, array[1]);
+      }));
+    });
+
+    it("promisen.wait(100)().then()", function(done) {
+      promisen.Promise = PromiseClass;
+      promisen.wait(100)("X").then(wrap(done, function(value) {
+        assert.equal("X", value);
       }));
     });
   });
