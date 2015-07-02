@@ -14,7 +14,7 @@ clean:
 	rm -fr $(DEST)
 
 $(DIST):
-	mkdir $(DIST)
+	mkdir -p $(DIST)
 
 $(DEST): $(SRC) $(DIST)
 	$(UGLIFYJS) $(SRC) -c -m -o $(DEST)

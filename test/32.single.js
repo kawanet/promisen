@@ -44,9 +44,7 @@ describe(TESTNAME + " testing", function() {
 
     it("promisen.single(wait) -> timeout", function(done) {
       var task = promisen.single(wait9, tick4);
-      task("X").then(function(value) {
-        console.warn("resolve:", value);
-      });
+      task("X").then();
       setTimeout(function() {
         var start = new Date();
         task("Y").then(wrap(done, function(value) {

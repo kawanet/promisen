@@ -42,6 +42,12 @@
    *
    * // https://github.com/tildeio/rsvp.js
    * promisen.Promise = require("rsvp").Promise;
+   *
+   * // https://github.com/calvinmetcalf/lie
+   * promisen.Promise = require("lie");
+   *
+   * // https://github.com/RubenVerborgh/promiscuous
+   * promisen.Promise = require("promiscuous");
    */
 
   promisen.Promise = polyfill ? require("es6-promise").Promise : Promise;
@@ -79,9 +85,7 @@
   promisen.denodeify = denodeify;
 
   /**
-   * Generates a task function which returns a promise (thenable) object.
-   * It uses Promise if available, or uses "es6-promise" polyfill library instead.
-   * Following types of tasks are available:
+   * Generates a promise-returning function from plain function or objects below:
    *
    * 1. function
    * 2. promise object
@@ -134,16 +138,16 @@
   }
 
   /**
-   * creates a task function which runs multiple tasks in order.
+   * creates a promise-returning function which runs multiple tasks in order.
    *
    * @class promisen
    * @function waterfall
    * @param tasks {Array|Array-like} list of tasks
-   * @returns {Function}
+   * @returns {Function} promise-returning function
    * @example
    * var promisen = require("promisen");
    *
-   * // generate a task function
+   * // generate a promise-returning function
    * var task = promisen.waterfall([task1, task2, task3,...]);
    *
    * // execute it
@@ -175,16 +179,16 @@
   }
 
   /**
-   * creates a task function which runs multiple tasks in order.
+   * creates a promise-returning function which runs multiple tasks in order.
    *
    * @class promisen
    * @function series
    * @param tasks {Array|Array-like} list of tasks
-   * @returns {Function}
+   * @returns {Function} promise-returning function
    * @example
    * var promisen = require("promisen");
    *
-   * // generate a task function
+   * // generate a promise-returning function
    * var task = promisen.series([task1, task2, task3,...]);
    *
    * // execute it
@@ -209,16 +213,16 @@
   }
 
   /**
-   * creates a task function which runs multiple tasks in parallel.
+   * creates a promise-returning function which runs multiple tasks in parallel.
    *
    * @class promisen
    * @function parallel
    * @param tasks {Array|Array-like} list of tasks
-   * @returns {Function}
+   * @returns {Function} promise-returning function
    * @example
    * var promisen = require("promisen");
    *
-   * // generate a task function
+   * // generate a promise-returning function
    * var task = promisen.parallel([task1, task2, task3,...]);
    *
    * // execute it
@@ -249,18 +253,18 @@
   }
 
   /**
-   * creates a task function which runs a task assigned by a conditional task.
+   * creates a promise-returning function which runs a task assigned by a conditional task.
    *
    * @class promisen
    * @function if
    * @param [condTask] {Boolean|Function|Promise|thenable|*} boolean or task returns boolean
    * @param [trueTask] {Function|Promise|thenable|*} task runs when true
    * @param [falseTask] {Function|Promise|thenable|*} task runs when false
-   * @returns {Function}
+   * @returns {Function} promise-returning function
    * @example
    * var promisen = require("promisen");
    *
-   * // generate a task function
+   * // generate a promise-returning function
    * var task = promisen.if(condTask, trueTask, falseTask);
    *
    * // execute itl[pi?K  jk ln lml;/,   m /P/.[h
@@ -301,13 +305,13 @@
   }
 
   /**
-   * creates a task function which runs a task repeatedly while a conditional task returns true.
+   * creates a promise-returning function which runs a task repeatedly while a conditional task returns true.
    *
    * @class promisen
    * @function while
    * @param condTask {Boolean|Function|Promise|thenable|*} boolean or task returns boolean
    * @param runTask {Function|Promise|thenable|*} task runs while true
-   * @returns {Function}
+   * @returns {Function} promise-returning function
    * @example
    * var promisen = require("promisen");
    *
@@ -336,13 +340,13 @@
   }
 
   /**
-   * creates a task function which runs task repeatedly for each value of array in order.
+   * creates a promise-returning function which runs task repeatedly for each value of array in order.
    *
    * @class promisen
    * @function eachSeries
    * @param arrayTask {Array|Function|Promise|thenable|*} array or task returns an array
    * @param runTask {Function|Promise|thenable|*} task runs repeatedly for each of array values
-   * @returns {Function}
+   * @returns {Function} promise-returning function
    * @example
    * var promisen = require("promisen");
    *
@@ -368,13 +372,13 @@
   }
 
   /**
-   * creates a task function which runs task repeatedly for each value of array in parallel.
+   * creates a promise-returning function which runs task repeatedly for each value of array in parallel.
    *
    * @class promisen
    * @function each
    * @param arrayTask {Array|Function|Promise|thenable|*} array or task returns an array
    * @param runTask {Function|Promise|thenable|*} task runs repeatedly for each of array values
-   * @returns {Function}
+   * @returns {Function} promise-returning function
    * @example
    * var promisen = require("promisen");
    *
@@ -400,12 +404,12 @@
   }
 
   /**
-   * creates a task function which increments a counter.
+   * creates a promise-returning function which increments a counter on top of stack.
    *
    * @class promisen
    * @function incr
    * @param array {Array|Array-like} counter holder
-   * @returns {Function}
+   * @returns {Function} promise-returning function
    * @example
    * var promisen = require("promisen");
    *
@@ -430,12 +434,12 @@
   }
 
   /**
-   * creates a task function which decrements a counter.
+   * creates a promise-returning function which decrements a counter on top of stack.
    *
    * @class promisen
    * @function decr
    * @param array {Array|Array-like} counter holder
-   * @returns {Function}
+   * @returns {Function} promise-returning function
    * @example
    * var promisen = require("promisen");
    *
@@ -460,12 +464,12 @@
   }
 
   /**
-   * creates a task function which stores a value into the array.
+   * creates a promise-returning function which stores a value into the array.
    *
    * @class promisen
    * @function push
    * @param array {Array|Array-like}
-   * @returns {Function}
+   * @returns {Function} promise-returning function
    * @example
    * var promisen = require("promisen");
    *
@@ -484,12 +488,12 @@
   }
 
   /**
-   * creates a task function which fetches the last value on the array.
+   * creates a promise-returning function which fetches the last value on the array.
    *
    * @class promisen
    * @function pop
    * @param array {Array|Array-like}
-   * @returns {Function}
+   * @returns {Function} promise-returning function
    * @example
    * var promisen = require("promisen");
    *
@@ -508,12 +512,12 @@
   }
 
   /**
-   * creates a task function which inspects the last value on the array.
+   * creates a promise-returning function which inspects the last value on the array.
    *
    * @class promisen
    * @function push
    * @param array {Array|Array-like}
-   * @returns {Function}
+   * @returns {Function} promise-returning function
    * @example
    * var promisen = require("promisen");
    *
@@ -532,12 +536,12 @@
   }
 
   /**
-   * creates a task function which inspects value to console.warn() for debug purpose.
+   * creates a promise-returning function which inspects value to console.warn() for debug purpose.
    *
    * @class promisen
    * @function warn
    * @param [prefix] {String}
-   * @returns {Function}
+   * @returns {Function} promise-returning function
    * @example
    * var promisen = require("promisen");
    *
@@ -562,12 +566,12 @@
   }
 
   /**
-   * creates a task function which inspects value to console.log() for debug purpose.
+   * creates a promise-returning function which inspects value to console.log() for debug purpose.
    *
    * @class promisen
    * @function log
    * @param [prefix] {String}
-   * @returns {Function}
+   * @returns {Function} promise-returning function
    * @example
    * var promisen = require("promisen");
    *
@@ -592,12 +596,12 @@
   }
 
   /**
-   * creates a task function which does just sleep for given milliseconds.
+   * creates a promise-returning function which does just sleep for given milliseconds.
    *
    * @class promisen
    * @function wait
    * @param msec {Number}
-   * @returns {Function}
+   * @returns {Function} promise-returning function
    * @example
    * var promisen = require("promisen");
    *
@@ -622,14 +626,14 @@
   }
 
   /**
-   * creates a task function which extends the given task with lock feature to run it in serial.
+   * creates a promise-returning function which extends the given task with lock feature to run it in serial.
    *
    * @class promisen
    * @function single
    * @param task {Function} task to extend the lock feature
    * @param timeout {Number} 1 minute per default
    * @param interval {Number} 1% length of timeout
-   * @returns {Function}
+   * @returns {Function} promise-returning function
    * @example
    * var promisen = require("promisen");
    *
