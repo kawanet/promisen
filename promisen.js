@@ -85,6 +85,9 @@
   promisen.nodeify = nodeify;
   promisen.denodeify = denodeify;
 
+  // memoize
+  promisen.memoize = memoize;
+
   /**
    * creates a promise-returning function from plain function or objects below:
    *
@@ -794,6 +797,58 @@
           return err ? reject(err) : resolve(value);
         }
       });
+    }
+  }
+
+  /**
+   * creates a promise-returning function which caches a result of task.
+   *
+   * The cache of result is exposed as the memo property of the function returned by memoize.
+   *
+   * @class promisen
+   * @static
+   * @function memoize
+   * @param task {Function} task to wrap
+   * @param expire {Number} millisecond until cache expired
+   * @param [hasher] {Function} default: JSON.stringify()
+   * @returns {Function} promise-returning function
+   * @example
+   * var promisen = require("promisen");
+   * var request = require("request");
+   *
+   * var ajaxGet = promisen.denodeify(request);
+   * var cachedAjax = promisen.memoize(ajaxGet);
+   *
+   * var req = {url: "http://www.example.com/"};
+   * cachedAjax(req).then(function(res) {...}); // res.body contains response body
+   */
+
+  function memoize(task, expire, hasher) {
+    var memo = memoizeTask.memo = {};
+    expire -= 0;
+    var expiry = {};
+    if (!hasher) hasher = JSON.stringify.bind(JSON);
+    return memoizeTask;
+
+    function memoizeTask(value) {
+      return waterfall([hasher, readCache]).call(this, value);
+
+      function readCache(hash) {
+        if (hash in expiry) {
+          if (expiry[hash] < new Date()) {
+            delete expiry[hash];
+            delete memo[hash];
+          }
+        }
+        if (hash in memo) return memo[hash];
+        return waterfall([task, writeCache]).call(this, value);
+
+        function writeCache(result) {
+          if (expire) expiry[hash] = new Date() - 0 + expire;
+          result = memo[hash] = resolve(result);
+          return result;
+        }
+      }
     }
   }
 
