@@ -17,7 +17,7 @@ describe(TESTNAME + " testing", function() {
       assert.ok("function", typeof promisen.eachSeries()().then);
     });
 
-    it("promisen.each(array, TASK)", function(done) {
+    it("promisen.each(array, iterationTask)", function(done) {
       var source = ["X", "Y", "Z"];
       var result = [];
       promisen.each(source, runTask)().then(wrap(done, function(value) {
@@ -36,9 +36,9 @@ describe(TESTNAME + " testing", function() {
       }
     });
 
-    it("promisen.each(arrayTask, TASK1, TASK2)", function(done) {
+    it("promisen.each(array, iterationTask, endTask)", function(done) {
       var source = [1, 2, 3];
-      promisen.each(arrayTask, doubleTask, incrTask)().then(wrap(done, function(value) {
+      promisen.each(source, doubleTask, endTask)().then(wrap(done, function(value) {
         assert.ok(value instanceof Array);
         assert.equal(source.length, value.length);
         assert.equal(source[0] * 2 + 1, value[0]);
@@ -46,12 +46,12 @@ describe(TESTNAME + " testing", function() {
         assert.equal(source[2] * 2 + 1, value[2]);
       }));
 
-      function arrayTask() {
-        return source;
+      function endTask(array) {
+        return array.map(incrTask);
       }
     });
 
-    it("promisen.each(array, ASYNC_TASK)", function(done) {
+    it("promisen.each(array, asyncTask)", function(done) {
       var source = [1, 2, 3];
       promisen.each(source, asyncTask)().then(wrap(done, function(value) {
         assert.ok(value instanceof Array);
@@ -62,7 +62,7 @@ describe(TESTNAME + " testing", function() {
       }));
     });
 
-    it("promisen.eachSeries(array, TASK)", function(done) {
+    it("promisen.eachSeries(array, iterationTask)", function(done) {
       var source = ["X", "Y", "Z"];
       var result = [];
       promisen.eachSeries(source, runTask)().then(wrap(done, function(value) {
@@ -81,9 +81,9 @@ describe(TESTNAME + " testing", function() {
       }
     });
 
-    it("promisen.eachSeries(arrayTask, TASK1, TASK2)", function(done) {
+    it("promisen.eachSeries(array, iterationTask, endTask)", function(done) {
       var source = [1, 2, 3];
-      promisen.eachSeries(arrayTask, doubleTask, incrTask)().then(wrap(done, function(value) {
+      promisen.eachSeries(source, doubleTask, endTask)().then(wrap(done, function(value) {
         assert.ok(value instanceof Array);
         assert.equal(source.length, value.length);
         assert.equal(source[0] * 2 + 1, value[0]);
@@ -91,12 +91,12 @@ describe(TESTNAME + " testing", function() {
         assert.equal(source[2] * 2 + 1, value[2]);
       }));
 
-      function arrayTask() {
-        return source;
+      function endTask(array) {
+        return array.map(incrTask);
       }
     });
 
-    it("promisen.eachSeries(array, ASYNC_TASK)", function(done) {
+    it("promisen.eachSeries(array, asyncTask)", function(done) {
       var source = [1, 2, 3];
       promisen.eachSeries(source, asyncTask)().then(wrap(done, function(value) {
         assert.ok(value instanceof Array);
