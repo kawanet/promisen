@@ -24,7 +24,7 @@ describe(TESTNAME + " testing", function() {
         assert.equal(array.length, TVALUES.length);
         array.forEach(function(value) {
           assert.ok(value > 0);
-          assert.ok(value < TVALUES.length);
+          assert.ok(value <= TVALUES.length);
         });
       })).catch(done);
     });
@@ -34,7 +34,7 @@ describe(TESTNAME + " testing", function() {
         assert.equal(array.length, TVALUES.length);
         array.forEach(function(value) {
           assert.ok(value > 0); // cached value
-          assert.ok(value < TVALUES.length); // cached value
+          assert.ok(value <= TVALUES.length); // cached value
         });
       })).catch(done);
     });

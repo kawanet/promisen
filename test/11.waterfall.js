@@ -15,12 +15,8 @@ describe(TESTNAME + " testing", function() {
     TVALUES.forEach(function(tvalue) {
       it("promisen.waterfall([1,2,3," + typestr(tvalue) + "])().then()", function(done) {
         promisen.waterfall([1, 2, 3, tvalue])().then(wrap(done, function(value) {
-          if (tvalue === null || tvalue === undef) {
-            assert.equal(3, value); // returns previous argument
-          } else {
-            assert.equal(tvalue, value);
-            assert.ok(tvalue === value);
-          }
+          assert.equal(tvalue, value);
+          assert.ok(tvalue === value);
         }));
       });
     });
@@ -59,10 +55,10 @@ describe(TESTNAME + " testing", function() {
       }));
     });
     it("promisen.waterfall(null)", function(done) {
-      var task = promisen.waterfall(null); // empty task
+      var task = promisen.waterfall(null); // returns null
       assert.equal("function", typeof task);
       task("Y").then(wrap(done, function(value) {
-        assert.equal("Y", value);
+        assert.equal(null, value);
       }));
     });
     it("promisen.waterfall(0)", function(done) {

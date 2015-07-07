@@ -19,13 +19,8 @@ describe(TESTNAME + " testing", function() {
           assert.equal(1, array[0]);
           assert.equal(2, array[1]);
           assert.equal(3, array[2]);
-          /*jshint eqnull:true*/
-          if (tvalue == null) {
-            assert.equal(10, array[3]);
-          } else {
-            assert.equal(tvalue, array[3]);
-            assert.ok(tvalue === array[3]);
-          }
+          assert.equal(tvalue, array[3]);
+          assert.ok(tvalue === array[3]);
         }));
       });
     });

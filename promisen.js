@@ -119,7 +119,6 @@
   function promisen(task) {
     if (arguments.length > 1) return waterfall(arguments);
     if (task instanceof Function) return executable;
-    if (task == null) return resolve;
     if (!arguments.length) return resolve;
     return constant;
 
@@ -174,13 +173,14 @@
       return tasks.reduce(chain.bind(this), resolve(value));
     }
 
+    // apply the first argument only. ignore rest.
     function wrap(task) {
-      return (task != null) && promisen(task);
+      return promisen(task);
     }
 
     // chain tasks
     function chain(promise, func) {
-      return func ? promise.then(func.bind(this)) : promise;
+      return promise.then(func.bind(this));
     }
   }
 
@@ -213,7 +213,7 @@
     tasks = waterfall(tasks);
     return waterfall([push(stack), tasks, result]);
 
-    // use the first argument only. ignore rest.
+    // apply the first argument only. ignore rest.
     function wrap(task) {
       return waterfall([top(stack), task, push(result)]);
     }
@@ -250,7 +250,7 @@
       return promisen.Promise.all(boundTasks);
     }
 
-    // use the first argument only. ignore rest.
+    // apply the first argument only. ignore rest.
     function wrap(task) {
       return promisen(task);
     }
@@ -263,12 +263,14 @@
   /**
    * creates a promise-returning function which runs a task assigned by a conditional task.
    *
+   * When null or undefined is given as a task, it will do nothing for value and just passes it.
+   *
    * @class promisen
    * @static
    * @function if
-   * @param [condTask] {Boolean|Function|Promise|thenable|*} boolean or function returns boolean
-   * @param [trueTask] {Function|Promise|thenable|*} task runs when true
-   * @param [falseTask] {Function|Promise|thenable|*} task runs when false
+   * @param [condTask] {Boolean|Function|Promise|thenable|*|null} boolean or function returns boolean
+   * @param [trueTask] {Function|Promise|thenable|*|null} task runs when true
+   * @param [falseTask] {Function|Promise|thenable|*|null} task runs when false
    * @returns {Function} promise-returning function
    * @example
    * var promisen = require("promisen");
@@ -316,10 +318,12 @@
   /**
    * creates a promise-returning function which runs a task repeatedly while the condition is true.
    *
+   * When null or undefined is given as condTask, it will do nothing for value and just passes it.
+   *
    * @class promisen
    * @static
    * @function while
-   * @param condTask {Boolean|Function|Promise|thenable|*} boolean or function returns boolean
+   * @param condTask {Boolean|Function|Promise|thenable|*|null} boolean or function returns boolean
    * @param runTask {...(Function|Promise|thenable|*)} task runs while true
    * @returns {Function} promise-returning function
    * @example
@@ -371,7 +375,7 @@
    */
 
   function eachSeries(arrayTask, iteratorTask, endTask) {
-    iteratorTask = (iteratorTask != null) ? promisen(iteratorTask) : promisen();
+    iteratorTask = promisen(iteratorTask);
     var args = Array.prototype.slice.call(arguments);
     args[1] = loopTask;
     return waterfall(args);
@@ -413,7 +417,7 @@
    */
 
   function each(arrayTask, iteratorTask, endTask) {
-    iteratorTask = (iteratorTask != null) ? promisen(iteratorTask) : promisen();
+    iteratorTask = promisen(iteratorTask);
     var args = Array.prototype.slice.call(arguments);
     args[1] = loopTask;
     return waterfall(args);
@@ -424,6 +428,7 @@
       return parallel(arrayResults).call(this);
     }
 
+    // apply the first argument only. ignore rest.
     function wrap(value) {
       return iterator;
       function iterator() {

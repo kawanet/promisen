@@ -33,12 +33,8 @@ describe(TESTNAME + " testing", function() {
     TVALUES.forEach(function(tvalue) {
       it("promisen(" + typestr(tvalue) + ")().then()", function(done) {
         promisen(tvalue)().then(wrap(done, function(value) {
-          if (tvalue === null || tvalue === undef) {
-            assert.equal(undef, value); // argument ignored
-          } else {
-            assert.equal(tvalue, value);
-            assert.ok(tvalue === value);
-          }
+          assert.equal(tvalue, value);
+          assert.ok(tvalue === value);
         }));
       });
     });
@@ -48,12 +44,8 @@ describe(TESTNAME + " testing", function() {
     TVALUES.forEach(function(tvalue) {
       it("promisen(1,2,3," + typestr(tvalue) + ")().then()", function(done) {
         promisen(1, 2, 3, tvalue)().then(wrap(done, function(value) {
-          if (tvalue === null || tvalue === undef) {
-            assert.equal(3, value); // returns previous argument
-          } else {
-            assert.equal(tvalue, value);
-            assert.ok(tvalue === value);
-          }
+          assert.equal(tvalue, value);
+          assert.ok(tvalue === value);
         }));
       });
     });
