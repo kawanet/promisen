@@ -1,6 +1,6 @@
 {
   "name": "promisen",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "description": "promisen.js creates promise-returning functions. ready for ES6 Promise.",
   "main": "promisen.js",
   "scripts": {
