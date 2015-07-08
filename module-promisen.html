@@ -254,7 +254,7 @@ promisen.Promise = require("promiscuous");</code></pre>
 
     
 
-    <h4 class="name" id="~decr"><span class="type-signature">(inner) </span>decr<span class="signature">(array)</span><span class="type-signature"> &rarr; {function}</span></h4>
+    <h4 class="name" id=".decr"><span class="type-signature">(static) </span>decr<span class="signature">(array)</span><span class="type-signature"> &rarr; {function}</span></h4>
 
     
 
@@ -410,6 +410,7 @@ promisen.Promise = require("promiscuous");</code></pre>
 
 var counter = [123];
 console.log("count: " + counter); // => count: 123
+
 var decrTask = counter.decr();
 decrTask().then(function(value) {...}); // => count: 122
 
@@ -423,7 +424,7 @@ var task = promisen(otherTask, decrTask);</code></pre>
 
     
 
-    <h4 class="name" id="~denodeify"><span class="type-signature">(inner) </span>denodeify<span class="signature">(task)</span><span class="type-signature"> &rarr; {function}</span></h4>
+    <h4 class="name" id=".denodeify"><span class="type-signature">(static) </span>denodeify<span class="signature">(task)</span><span class="type-signature"> &rarr; {function}</span></h4>
 
     
 
@@ -573,9 +574,13 @@ var task = promisen(otherTask, decrTask);</code></pre>
     <h5>Example</h5>
     
     <pre class="prettyprint"><code>var promisen = require("promisen");
+var fs = require("fs");
 
-var task = denodeify(request.get.bind(request);
-task(req).then(function(value) {...}).catch(function(reason) {...});</code></pre>
+// you should bind target object with the task
+var readFile = promisen.denodeify(fs.readFile.bind(fs));
+
+// readFile() is now available as a promise-returning function
+readFile("README.md", "utf-8").then(function(value) {...}).catch(function(reason) {...});</code></pre>
 
 
 
@@ -584,7 +589,7 @@ task(req).then(function(value) {...}).catch(function(reason) {...});</code></pre
 
     
 
-    <h4 class="name" id="~each"><span class="type-signature">(inner) </span>each<span class="signature">(arrayTask, runTask)</span><span class="type-signature"> &rarr; {function}</span></h4>
+    <h4 class="name" id=".each"><span class="type-signature">(static) </span>each<span class="signature">(arrayTask, iteratorTask)</span><span class="type-signature"> &rarr; {function}</span></h4>
 
     
 
@@ -643,9 +648,6 @@ task(req).then(function(value) {...}).catch(function(reason) {...});</code></pre
 |
 
 <span class="param-type">thenable</span>
-|
-
-<span class="param-type">*</span>
 
 
             
@@ -655,29 +657,20 @@ task(req).then(function(value) {...}).catch(function(reason) {...});</code></pre
 
             
 
-            <td class="description last">array or function returns an array</td>
+            <td class="description last">array or task returns array for iteration</td>
         </tr>
 
     
 
         <tr>
             
-                <td class="name"><code>runTask</code></td>
+                <td class="name"><code>iteratorTask</code></td>
             
 
             <td class="type">
             
                 
 <span class="param-type">function</span>
-|
-
-<span class="param-type">Promise</span>
-|
-
-<span class="param-type">thenable</span>
-|
-
-<span class="param-type">*</span>
 
 
             
@@ -779,8 +772,13 @@ task(req).then(function(value) {...}).catch(function(reason) {...});</code></pre
     
     <pre class="prettyprint"><code>var promisen = require("promisen");
 
-var task2 = promisen.each([1, 2, 3], task1);
-task2.call(target).then(function() {...});</code></pre>
+var task = promisen.each([2, 4, 6], div2);
+
+task.call(target).then(function(array) {...}); // => [1, 2, 3]
+
+function div2(value) {
+  return value / 2;
+}</code></pre>
 
 
 
@@ -789,7 +787,7 @@ task2.call(target).then(function() {...});</code></pre>
 
     
 
-    <h4 class="name" id="~eachSeries"><span class="type-signature">(inner) </span>eachSeries<span class="signature">(arrayTask, runTask)</span><span class="type-signature"> &rarr; {function}</span></h4>
+    <h4 class="name" id=".eachSeries"><span class="type-signature">(static) </span>eachSeries<span class="signature">(arrayTask, iteratorTask)</span><span class="type-signature"> &rarr; {function}</span></h4>
 
     
 
@@ -848,9 +846,6 @@ task2.call(target).then(function() {...});</code></pre>
 |
 
 <span class="param-type">thenable</span>
-|
-
-<span class="param-type">*</span>
 
 
             
@@ -860,29 +855,20 @@ task2.call(target).then(function() {...});</code></pre>
 
             
 
-            <td class="description last">array or function returns an array</td>
+            <td class="description last">array or task returns array for iteration</td>
         </tr>
 
     
 
         <tr>
             
-                <td class="name"><code>runTask</code></td>
+                <td class="name"><code>iteratorTask</code></td>
             
 
             <td class="type">
             
                 
 <span class="param-type">function</span>
-|
-
-<span class="param-type">Promise</span>
-|
-
-<span class="param-type">thenable</span>
-|
-
-<span class="param-type">*</span>
 
 
             
@@ -984,8 +970,13 @@ task2.call(target).then(function() {...});</code></pre>
     
     <pre class="prettyprint"><code>var promisen = require("promisen");
 
-var task2 = promisen.eachSeries([1, 2, 3], task1);
-task2.call(target).then(function() {...});</code></pre>
+var task = promisen.eachSeries([1, 2, 3], mul2);
+
+task.call(target).then(function(array) {...}); // => [2, 4, 6]
+
+function mul2(value) {
+  return value * 2;
+}</code></pre>
 
 
 
@@ -994,7 +985,7 @@ task2.call(target).then(function() {...});</code></pre>
 
     
 
-    <h4 class="name" id="~if"><span class="type-signature">(inner) </span>if<span class="signature">(condTask<span class="signature-attributes">opt</span>, trueTask<span class="signature-attributes">opt</span>, falseTask<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {function}</span></h4>
+    <h4 class="name" id=".if"><span class="type-signature">(static) </span>if<span class="signature">(condTask<span class="signature-attributes">opt</span>, trueTask<span class="signature-attributes">opt</span>, falseTask<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {function}</span></h4>
 
     
 
@@ -1002,6 +993,8 @@ task2.call(target).then(function() {...});</code></pre>
 
 <div class="description">
     creates a promise-returning function which runs a task assigned by a conditional task.
+
+When null or undefined is given as a task, it will do nothing for value and just passes it.
 </div>
 
 
@@ -1058,6 +1051,9 @@ task2.call(target).then(function() {...});</code></pre>
 |
 
 <span class="param-type">*</span>
+|
+
+<span class="param-type">null</span>
 
 
             
@@ -1100,6 +1096,9 @@ task2.call(target).then(function() {...});</code></pre>
 |
 
 <span class="param-type">*</span>
+|
+
+<span class="param-type">null</span>
 
 
             
@@ -1142,6 +1141,9 @@ task2.call(target).then(function() {...});</code></pre>
 |
 
 <span class="param-type">*</span>
+|
+
+<span class="param-type">null</span>
 
 
             
@@ -1281,7 +1283,7 @@ var task = promisen.IF(condTask, trueTask, falseTask);</code></pre>
 
     
 
-    <h4 class="name" id="~incr"><span class="type-signature">(inner) </span>incr<span class="signature">(array)</span><span class="type-signature"> &rarr; {function}</span></h4>
+    <h4 class="name" id=".incr"><span class="type-signature">(static) </span>incr<span class="signature">(array)</span><span class="type-signature"> &rarr; {function}</span></h4>
 
     
 
@@ -1437,6 +1439,7 @@ var task = promisen.IF(condTask, trueTask, falseTask);</code></pre>
 
 var counter = [123];
 console.log("count: " + counter); // => count: 123
+
 var incrTask = counter.incr();
 incrTask().then(function(value) {...}); // => count: 124
 
@@ -1450,7 +1453,7 @@ var task = promisen(otherTask, incrTask);</code></pre>
 
     
 
-    <h4 class="name" id="~log"><span class="type-signature">(inner) </span>log<span class="signature">(prefix<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {function}</span></h4>
+    <h4 class="name" id=".log"><span class="type-signature">(static) </span>log<span class="signature">(prefix<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {function}</span></h4>
 
     
 
@@ -1613,8 +1616,8 @@ var task = promisen(otherTask, incrTask);</code></pre>
     
     <pre class="prettyprint"><code>var promisen = require("promisen");
 
-var stack = ["foo", "bar"];
 var task3 = promisen(task1, promisen.log("result:"), task2);
+
 task3().then(function() {...});</code></pre>
 
 
@@ -1624,7 +1627,248 @@ task3().then(function() {...});</code></pre>
 
     
 
-    <h4 class="name" id="~nodeify"><span class="type-signature">(inner) </span>nodeify<span class="signature">(task)</span><span class="type-signature"> &rarr; {function}</span></h4>
+    <h4 class="name" id=".memoize"><span class="type-signature">(static) </span>memoize<span class="signature">(task, expire, hasher<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {function}</span></h4>
+
+    
+
+
+
+<div class="description">
+    creates a promise-returning function which caches a result of task.
+
+The cache of result is exposed as the memo property of the function returned by memoize.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>task</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">task to wrap</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>expire</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">millisecond until cache expired</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>hasher</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">default: JSON.stringify()</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    promise-returning function
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">function</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+    <h5>Example</h5>
+    
+    <pre class="prettyprint"><code>var promisen = require("promisen");
+var request = require("request");
+
+var ajaxGet = promisen.denodeify(request);
+var cachedAjax = promisen.memoize(ajaxGet);
+
+var req = {url: "http://www.example.com/"};
+cachedAjax(req).then(function(res) {...}); // res.body contains response body</code></pre>
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id=".nodeify"><span class="type-signature">(static) </span>nodeify<span class="signature">(task)</span><span class="type-signature"> &rarr; {function}</span></h4>
 
     
 
@@ -1785,6 +2029,7 @@ task3().then(function() {...});</code></pre>
     <pre class="prettyprint"><code>var promisen = require("promisen");
 
 var task = nodeify(func);
+
 task(value, function(err, res) {...});
 
 function func(value) {
@@ -1798,7 +2043,7 @@ function func(value) {
 
     
 
-    <h4 class="name" id="~parallel"><span class="type-signature">(inner) </span>parallel<span class="signature">(tasks)</span><span class="type-signature"> &rarr; {function}</span></h4>
+    <h4 class="name" id=".parallel"><span class="type-signature">(static) </span>parallel<span class="signature">(tasks)</span><span class="type-signature"> &rarr; {function}</span></h4>
 
     
 
@@ -1968,7 +2213,7 @@ task.call(target, value).then(function(result) {...});</code></pre>
 
     
 
-    <h4 class="name" id="~pop"><span class="type-signature">(inner) </span>pop<span class="signature">(array)</span><span class="type-signature"> &rarr; {function}</span></h4>
+    <h4 class="name" id=".pop"><span class="type-signature">(static) </span>pop<span class="signature">(array)</span><span class="type-signature"> &rarr; {function}</span></h4>
 
     
 
@@ -2122,8 +2367,10 @@ task.call(target, value).then(function(result) {...});</code></pre>
     
     <pre class="prettyprint"><code>var promisen = require("promisen");
 
-var stack = ["foo", "bar"];
+var stack = ["foo", "bar"]; // stack is an array
+
 var task2 = promisen(promisen.pop(stack), task1);
+
 task2().then(function() {...}); // stack.length == 1</code></pre>
 
 
@@ -2133,7 +2380,7 @@ task2().then(function() {...}); // stack.length == 1</code></pre>
 
     
 
-    <h4 class="name" id="~promisen"><span class="type-signature">(inner) </span>promisen<span class="signature">(task)</span><span class="type-signature"> &rarr; {function}</span></h4>
+    <h4 class="name" id=".promisen"><span class="type-signature">(static) </span>promisen<span class="signature">(&hellip;task)</span><span class="type-signature"> &rarr; {function}</span></h4>
 
     
 
@@ -2170,6 +2417,8 @@ task2().then(function() {...}); // stack.length == 1</code></pre>
         <th>Type</th>
 
         
+        <th>Attributes</th>
+        
 
         
 
@@ -2203,6 +2452,16 @@ task2().then(function() {...}); // stack.length == 1</code></pre>
             
             </td>
 
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                    &lt;repeatable><br>
+                
+                </td>
             
 
             
@@ -2319,7 +2578,7 @@ joined(value).then(function(result) {...});</code></pre>
 
     
 
-    <h4 class="name" id="~push"><span class="type-signature">(inner) </span>push<span class="signature">(array)</span><span class="type-signature"> &rarr; {function}</span></h4>
+    <h4 class="name" id=".push"><span class="type-signature">(static) </span>push<span class="signature">(array)</span><span class="type-signature"> &rarr; {function}</span></h4>
 
     
 
@@ -2473,8 +2732,10 @@ joined(value).then(function(result) {...});</code></pre>
     
     <pre class="prettyprint"><code>var promisen = require("promisen");
 
-var stack = ["foo", "bar"];
+var stack = ["foo", "bar"]; // stack is an array
+
 var task2 = promisen(promisen.top(stack), task1);
+
 task2().then(function() {...}); // stack.length == 2</code></pre>
 
 
@@ -2484,7 +2745,7 @@ task2().then(function() {...}); // stack.length == 2</code></pre>
 
     
 
-    <h4 class="name" id="~push"><span class="type-signature">(inner) </span>push<span class="signature">(array)</span><span class="type-signature"> &rarr; {function}</span></h4>
+    <h4 class="name" id=".push"><span class="type-signature">(static) </span>push<span class="signature">(array)</span><span class="type-signature"> &rarr; {function}</span></h4>
 
     
 
@@ -2638,8 +2899,10 @@ task2().then(function() {...}); // stack.length == 2</code></pre>
     
     <pre class="prettyprint"><code>var promisen = require("promisen");
 
-var stack = [];
+var stack = []; // stack is an array
+
 var task2 = promisen(task1, promisen.push(stack));
+
 task2().then(function() {...}); // stack.length == 2</code></pre>
 
 
@@ -2649,7 +2912,7 @@ task2().then(function() {...}); // stack.length == 2</code></pre>
 
     
 
-    <h4 class="name" id="~series"><span class="type-signature">(inner) </span>series<span class="signature">(tasks)</span><span class="type-signature"> &rarr; {function}</span></h4>
+    <h4 class="name" id=".series"><span class="type-signature">(static) </span>series<span class="signature">(tasks)</span><span class="type-signature"> &rarr; {function}</span></h4>
 
     
 
@@ -2819,14 +3082,14 @@ task.call(target, value).then(function(result) {...});</code></pre>
 
     
 
-    <h4 class="name" id="~single"><span class="type-signature">(inner) </span>single<span class="signature">(task, timeout, interval)</span><span class="type-signature"> &rarr; {function}</span></h4>
+    <h4 class="name" id=".throttle"><span class="type-signature">(static) </span>throttle<span class="signature">(task, concurrency, timeout)</span><span class="type-signature"> &rarr; {function}</span></h4>
 
     
 
 
 
 <div class="description">
-    creates a promise-returning function which extends the given task with lock feature to run it in serial.
+    creates a promise-returning function which limits number of concurrent job workers run in parallel.
 </div>
 
 
@@ -2878,7 +3141,30 @@ task.call(target, value).then(function(result) {...});</code></pre>
 
             
 
-            <td class="description last">task to extend the lock feature</td>
+            <td class="description last">the job</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>concurrency</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">number of job workers run in parallel (default: 1)</td>
         </tr>
 
     
@@ -2901,30 +3187,7 @@ task.call(target, value).then(function(result) {...});</code></pre>
 
             
 
-            <td class="description last">1 minute per default</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>interval</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">Number</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">1% length of timeout</td>
+            <td class="description last">timeout in millisecond until job started (default: no timeout)</td>
         </tr>
 
     
@@ -3016,7 +3279,8 @@ task.call(target, value).then(function(result) {...});</code></pre>
     
     <pre class="prettyprint"><code>var promisen = require("promisen");
 
-var serialAjaxTask = promisen.single(ajaxTask, 10000); // 10 seconds
+var serialAjaxTask = promisen.single(ajaxTask, 10000, 1); // 10 seconds, 1 worker
+
 serialAjaxTask(req).then(function(res) {...});</code></pre>
 
 
@@ -3026,7 +3290,183 @@ serialAjaxTask(req).then(function(res) {...});</code></pre>
 
     
 
-    <h4 class="name" id="~wait"><span class="type-signature">(inner) </span>wait<span class="signature">(msec)</span><span class="type-signature"> &rarr; {function}</span></h4>
+    <h4 class="name" id=".timeout"><span class="type-signature">(static) </span>timeout<span class="signature">(task, msec)</span><span class="type-signature"> &rarr; {function}</span></h4>
+
+    
+
+
+
+<div class="description">
+    creates a promise-returning function which has timeout detection until job done.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>task</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">the job</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>msec</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">timeout in millisecond until job done (default: no timeout)</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    promise-returning function
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">function</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id=".wait"><span class="type-signature">(static) </span>wait<span class="signature">(msec)</span><span class="type-signature"> &rarr; {function}</span></h4>
 
     
 
@@ -3190,7 +3630,7 @@ setTimeout(function() {...}, 1000);</code></pre>
 
     
 
-    <h4 class="name" id="~warn"><span class="type-signature">(inner) </span>warn<span class="signature">(prefix<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {function}</span></h4>
+    <h4 class="name" id=".warn"><span class="type-signature">(static) </span>warn<span class="signature">(prefix<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {function}</span></h4>
 
     
 
@@ -3353,8 +3793,8 @@ setTimeout(function() {...}, 1000);</code></pre>
     
     <pre class="prettyprint"><code>var promisen = require("promisen");
 
-var stack = ["foo", "bar"];
 var task3 = promisen(task1, promisen.warn("result:"), task2);
+
 task3().then(function() {...});</code></pre>
 
 
@@ -3364,7 +3804,7 @@ task3().then(function() {...});</code></pre>
 
     
 
-    <h4 class="name" id="~waterfall"><span class="type-signature">(inner) </span>waterfall<span class="signature">(tasks)</span><span class="type-signature"> &rarr; {function}</span></h4>
+    <h4 class="name" id=".waterfall"><span class="type-signature">(static) </span>waterfall<span class="signature">(tasks)</span><span class="type-signature"> &rarr; {function}</span></h4>
 
     
 
@@ -3534,7 +3974,7 @@ task.call(target, value).then(function(result) {...});</code></pre>
 
     
 
-    <h4 class="name" id="~while"><span class="type-signature">(inner) </span>while<span class="signature">(condTask, runTask)</span><span class="type-signature"> &rarr; {function}</span></h4>
+    <h4 class="name" id=".while"><span class="type-signature">(static) </span>while<span class="signature">(condTask, &hellip;runTask)</span><span class="type-signature"> &rarr; {function}</span></h4>
 
     
 
@@ -3542,6 +3982,8 @@ task.call(target, value).then(function(result) {...});</code></pre>
 
 <div class="description">
     creates a promise-returning function which runs a task repeatedly while the condition is true.
+
+When null or undefined is given as condTask, it will do nothing for value and just passes it.
 </div>
 
 
@@ -3564,6 +4006,8 @@ task.call(target, value).then(function(result) {...});</code></pre>
 
         <th>Type</th>
 
+        
+        <th>Attributes</th>
         
 
         
@@ -3596,11 +4040,22 @@ task.call(target, value).then(function(result) {...});</code></pre>
 |
 
 <span class="param-type">*</span>
+|
+
+<span class="param-type">null</span>
 
 
             
             </td>
 
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
             
 
             
@@ -3633,6 +4088,16 @@ task.call(target, value).then(function(result) {...});</code></pre>
             
             </td>
 
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                    &lt;repeatable><br>
+                
+                </td>
             
 
             
