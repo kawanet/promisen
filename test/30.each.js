@@ -17,107 +17,101 @@ describe(TESTNAME + " testing", function() {
       assert.ok("function", typeof promisen.eachSeries()().then);
     });
 
-    it("promisen.each(array, iterationTask)", function(done) {
-      var source = ["X", "Y", "Z"];
-      var result = [];
-      promisen.each(source, runTask)().then(wrap(done, function(value) {
+    it("promisen.each(array, syncTask)", function(done) {
+      var source = [1, 2, 3];
+      promisen.each(source, syncTask)().then(wrap(done, function(value) {
         assert.ok(value instanceof Array);
         assert.equal(3, source.length);
-        assert.equal(3, result.length);
-        assert.equal(3, value.length);
-        assert.equal(source[0], result[0]);
-        assert.equal(source[1], value[1]);
-        assert.equal(result[2], value[2]);
+        assert.equal(source[0] + 1, value[0]);
+        assert.equal(source[1] + 1, value[1]);
+        assert.equal(source[2] + 1, value[2]);
       }));
-
-      function runTask(value) {
-        result.push(value);
-        return value;
-      }
     });
 
-    it("promisen.each(array, iterationTask, endTask)", function(done) {
-      var source = [1, 2, 3];
-      promisen.each(source, doubleTask, endTask)().then(wrap(done, function(value) {
+    it("promisen.each(null, syncTask)(array)", function(done) {
+      var source = [2, 3, 4];
+      promisen.each(null, syncTask)(source).then(wrap(done, function(value) {
         assert.ok(value instanceof Array);
-        assert.equal(source.length, value.length);
-        assert.equal(source[0] * 2 + 1, value[0]);
-        assert.equal(source[1] * 2 + 1, value[1]);
-        assert.equal(source[2] * 2 + 1, value[2]);
+        assert.equal(3, source.length);
+        assert.equal(source[0] + 1, value[0]);
+        assert.equal(source[1] + 1, value[1]);
+        assert.equal(source[2] + 1, value[2]);
+      }));
+    });
+
+    it("promisen.each(arrayTask, syncTask)", function(done) {
+      var source = [3, 4, 5];
+      promisen.each(arrayTask, syncTask)().then(wrap(done, function(value) {
+        assert.ok(value instanceof Array);
+        assert.equal(3, source.length);
+        assert.equal(source[0] + 1, value[0]);
+        assert.equal(source[1] + 1, value[1]);
+        assert.equal(source[2] + 1, value[2]);
       }));
 
-      function endTask(array) {
-        return array.map(incrTask);
+      function arrayTask() {
+        return source;
       }
     });
 
     it("promisen.each(array, asyncTask)", function(done) {
-      var source = [1, 2, 3];
+      var source = [4, 5, 6];
+      var start = new Date();
       promisen.each(source, asyncTask)().then(wrap(done, function(value) {
         assert.ok(value instanceof Array);
         assert.equal(source.length, value.length);
         assert.equal(source[0] + 1, value[0]);
         assert.equal(source[1] + 1, value[1]);
         assert.equal(source[2] + 1, value[2]);
+        var duration = new Date() - start;
+        assert.ok(duration > 50);
+        assert.ok(duration < 150);
       }));
     });
 
-    it("promisen.eachSeries(array, iterationTask)", function(done) {
-      var source = ["X", "Y", "Z"];
-      var result = [];
-      promisen.eachSeries(source, runTask)().then(wrap(done, function(value) {
+    it("promisen.eachSeries(array, syncTask)", function(done) {
+      var source = [5, 6, 7];
+      promisen.eachSeries(source, syncTask)().then(wrap(done, function(value) {
         assert.ok(value instanceof Array);
         assert.equal(3, source.length);
-        assert.equal(3, result.length);
         assert.equal(3, value.length);
-        assert.equal(source[0], result[0]);
-        assert.equal(source[1], value[1]);
-        assert.equal(result[2], value[2]);
-      }));
-
-      function runTask(value) {
-        result.push(value);
-        return value;
-      }
-    });
-
-    it("promisen.eachSeries(array, iterationTask, endTask)", function(done) {
-      var source = [1, 2, 3];
-      promisen.eachSeries(source, doubleTask, endTask)().then(wrap(done, function(value) {
-        assert.ok(value instanceof Array);
-        assert.equal(source.length, value.length);
-        assert.equal(source[0] * 2 + 1, value[0]);
-        assert.equal(source[1] * 2 + 1, value[1]);
-        assert.equal(source[2] * 2 + 1, value[2]);
-      }));
-
-      function endTask(array) {
-        return array.map(incrTask);
-      }
-    });
-
-    it("promisen.eachSeries(array, asyncTask)", function(done) {
-      var source = [1, 2, 3];
-      promisen.eachSeries(source, asyncTask)().then(wrap(done, function(value) {
-        assert.ok(value instanceof Array);
-        assert.equal(source.length, value.length);
         assert.equal(source[0] + 1, value[0]);
         assert.equal(source[1] + 1, value[1]);
         assert.equal(source[2] + 1, value[2]);
       }));
     });
 
+    it("promisen.eachSeries(null, syncTask)(array)", function(done) {
+      var source = [7, 8, 9];
+      promisen.eachSeries(null, syncTask)(source).then(wrap(done, function(value) {
+        assert.ok(value instanceof Array);
+        assert.equal(3, source.length);
+        assert.equal(source[0] + 1, value[0]);
+        assert.equal(source[1] + 1, value[1]);
+        assert.equal(source[2] + 1, value[2]);
+      }));
+    });
+
+    it("promisen.eachSeries(array, asyncTask)", function(done) {
+      var source = [8, 9, 10];
+      var start = new Date();
+      promisen.eachSeries(source, asyncTask)().then(wrap(done, function(value) {
+        assert.ok(value instanceof Array);
+        assert.equal(source.length, value.length);
+        assert.equal(source[0] + 1, value[0]);
+        assert.equal(source[1] + 1, value[1]);
+        assert.equal(source[2] + 1, value[2]);
+        var duration = new Date() - start;
+        assert.ok(duration > 250);
+        assert.ok(duration < 350);
+      }));
+    });
+
   });
 });
 
-function doubleTask(value) {
-  value *= 2;
-  return value;
-}
-
-function incrTask(value) {
-  value++;
-  return value;
+function syncTask(value) {
+  return value + 1;
 }
 
 function asyncTask(value) {

@@ -29,13 +29,21 @@ describe(TESTNAME + " testing", function() {
       }));
     });
     it("promisen.waterfall([SYNC_FUNCTION,ASYNC_FUNCTION])(10).then()", function(done) {
+      var start = new Date();
       promisen.waterfall([incr_function, async_function])(10).then(wrap(done, function(value) {
         assert.equal(10, value);
+        var duration = new Date() - start;
+        assert.ok(duration > 50);
+        assert.ok(duration < 150);
       }));
     });
     it("promisen.waterfall([ASYNC_FUNCTION,ASYNC_FUNCTION])(10).then()", function(done) {
+      var start = new Date();
       promisen.waterfall([async_function, async_function])(10).then(wrap(done, function(value) {
         assert.equal(8, value);
+        var duration = new Date() - start;
+        assert.ok(duration > 150);
+        assert.ok(duration < 250);
       }));
     });
     it("promisen.waterfall([BOUND_FUNCTION,BOUND_FUNCTION]).call(OBJECT).then()", function(done) {

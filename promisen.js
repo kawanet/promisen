@@ -361,7 +361,6 @@
    * @function eachSeries
    * @param arrayTask {Array|Function|Promise|thenable} array or task returns array for iteration
    * @param iteratorTask {Function} task runs repeatedly for each of array values
-   * @param [endTask] {...(Function|Promise|thenable|*)} task receives array from iteration
    * @returns {Function} promise-returning function
    * @example
    * var promisen = require("promisen");
@@ -375,11 +374,10 @@
    * }
    */
 
-  function eachSeries(arrayTask, iteratorTask, endTask) {
+  function eachSeries(arrayTask, iteratorTask) {
+    if (arrayTask == null) arrayTask = promisen();
     iteratorTask = promisen(iteratorTask);
-    var args = Array.prototype.slice.call(arguments);
-    args[1] = loopTask;
-    return waterfall(args);
+    return waterfall([arrayTask, loopTask]);
 
     // composite multiple tasks
     function loopTask(arrayResults) {
@@ -403,7 +401,6 @@
    * @function each
    * @param arrayTask {Array|Function|Promise|thenable} array or task returns array for iteration
    * @param iteratorTask {Function} task runs repeatedly for each of array values
-   * @param [endTask] {...(Function|Promise|thenable|*)} task receives array from iteration
    * @returns {Function} promise-returning function
    * @example
    * var promisen = require("promisen");
@@ -417,11 +414,10 @@
    * }
    */
 
-  function each(arrayTask, iteratorTask, endTask) {
+  function each(arrayTask, iteratorTask) {
+    if (arrayTask == null) arrayTask = promisen();
     iteratorTask = promisen(iteratorTask);
-    var args = Array.prototype.slice.call(arguments);
-    args[1] = loopTask;
-    return waterfall(args);
+    return waterfall([arrayTask, loopTask]);
 
     // composite multiple tasks
     function loopTask(arrayResults) {
@@ -698,7 +694,7 @@
     if (!concurrency) concurrency = 1;
     task = promisen(task);
     var queue = singleTask.queue = [];
-    var running = singleTask.running = [];
+    var running = singleTask.running = {};
     var serial = 0;
     return singleTask;
 

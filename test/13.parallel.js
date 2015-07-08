@@ -38,19 +38,27 @@ describe(TESTNAME + " testing", function() {
 
     // one sync and one async
     it("promisen.parallel([SYNC_FUNCTION,ASYNC_FUNCTION])(10).then()", function(done) {
+      var start = new Date();
       promisen.parallel([incr_function, async_function])(10).then(wrap(done, function(array) {
         assert.equal(2, array.length);
         assert.equal(11, array[0]);
         assert.equal(9, array[1]);
+        var duration = new Date() - start;
+        assert.ok(duration > 50);
+        assert.ok(duration < 150);
       }));
     });
 
     // two async
     it("promisen.parallel([ASYNC_FUNCTION,ASYNC_FUNCTION])(10).then()", function(done) {
+      var start = new Date();
       promisen.parallel([async_function, async_function])(10).then(wrap(done, function(array) {
         assert.equal(2, array.length);
         assert.equal(9, array[0]);
         assert.equal(9, array[1]);
+        var duration = new Date() - start;
+        assert.ok(duration > 50);
+        assert.ok(duration < 150);
       }));
     });
 

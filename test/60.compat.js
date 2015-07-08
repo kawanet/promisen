@@ -5,16 +5,10 @@ var assert = require("assert");
 var TESTNAME = __filename.replace(/^.*\//, "");
 var promisen = require("../promisen");
 
-var P = require("kew").Promise;
-P.resolve = (new P()).resolve;
-
 describe(TESTNAME + " testing", function() {
   test("es6-promise:", function() {
     return require("es6-promise").Promise;
   });
-  test("kew:", function() {
-    return require("kew");
-  }, "(not compatible with ES6 Promise interface)");
   test("q:", function() {
     return require("q").Promise;
   });
@@ -71,39 +65,51 @@ function test(name, loader, skip) {
 
     it("promisen.series([ASYNC_TASK, ASYNC_TASK])(1).then()", function(done) {
       promisen.Promise = PromiseClass;
+      var start = new Date();
       promisen.series([asyncTask, asyncTask])(1).then(wrap(done, function(array) {
         assert.equal(2, array.length);
         assert.equal(2, array[0]);
         assert.equal(2, array[1]);
+        var duration = new Date() - start;
+        assert.ok(duration > 150);
+        assert.ok(duration < 250);
       }));
     });
 
     it("promisen.parallel([ASYNC_TASK, ASYNC_TASK])(1).then()", function(done) {
       promisen.Promise = PromiseClass;
+      var start = new Date();
       promisen.parallel([asyncTask, asyncTask])(1).then(wrap(done, function(array) {
         assert.equal(2, array.length);
         assert.equal(2, array[0]);
         assert.equal(2, array[1]);
+        var duration = new Date() - start;
+        assert.ok(duration > 50);
+        assert.ok(duration < 150);
       }));
     });
 
     it("promisen.wait(100)().then()", function(done) {
       promisen.Promise = PromiseClass;
+      var start = new Date();
       promisen.wait(100)("X").then(wrap(done, function(value) {
         assert.equal("X", value);
+        var duration = new Date() - start;
+        assert.ok(duration > 50);
+        assert.ok(duration < 150);
       }));
     });
 
     it("promisen.timeout(SYNC_TASK)(1).then()", function(done) {
       promisen.Promise = PromiseClass;
-      promisen.timeout(syncTask)(1).then(wrap(done, function(value) {
+      promisen.timeout(syncTask, 100)(1).then(wrap(done, function(value) {
         assert.equal(2, value);
       }));
     });
 
     it("promisen.throttle(SYNC_TASK)(1).then()", function(done) {
       promisen.Promise = PromiseClass;
-      promisen.throttle(syncTask)(1).then(wrap(done, function(value) {
+      promisen.throttle(syncTask, 1, 100)(1).then(wrap(done, function(value) {
         assert.equal(2, value);
       }));
     });
