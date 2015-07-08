@@ -93,6 +93,20 @@ function test(name, loader, skip) {
         assert.equal("X", value);
       }));
     });
+
+    it("promisen.timeout(SYNC_TASK)(1).then()", function(done) {
+      promisen.Promise = PromiseClass;
+      promisen.timeout(syncTask)(1).then(wrap(done, function(value) {
+        assert.equal(2, value);
+      }));
+    });
+
+    it("promisen.throttle(SYNC_TASK)(1).then()", function(done) {
+      promisen.Promise = PromiseClass;
+      promisen.throttle(syncTask)(1).then(wrap(done, function(value) {
+        assert.equal(2, value);
+      }));
+    });
   });
 }
 

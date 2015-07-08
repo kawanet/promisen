@@ -79,7 +79,8 @@
   promisen.wait = wait;
 
   // lock
-  promisen.single = single;
+  promisen.throttle = throttle;
+  promisen.timeout = timeout;
 
   // nodeify / denodeify
   promisen.nodeify = nodeify;
@@ -676,59 +677,113 @@
   }
 
   /**
-   * creates a promise-returning function which extends the given task with lock feature to run it in serial.
+   * creates a promise-returning function which limits number of concurrent job workers run in parallel.
    *
    * @class promisen
    * @static
-   * @function single
-   * @param task {Function} task to extend the lock feature
-   * @param timeout {Number} 1 minute per default
-   * @param interval {Number} 1% length of timeout
+   * @function throttle
+   * @param task {Function} the job
+   * @param concurrency {Number} number of job workers run in parallel (default: 1)
+   * @param timeout {Number} timeout in millisecond until job started (default: no timeout)
    * @returns {Function} promise-returning function
    * @example
    * var promisen = require("promisen");
    *
-   * var serialAjaxTask = promisen.single(ajaxTask, 10000); // 10 seconds
+   * var serialAjaxTask = promisen.single(ajaxTask, 10000, 1); // 10 seconds, 1 worker
    *
    * serialAjaxTask(req).then(function(res) {...});
    */
 
-  function single(task, timeout, interval) {
-    if (!timeout) timeout = 60 * 1000; // 1 minute
-    if (!interval) interval = Math.ceil(timeout / 100);
-    var mainTask = promisen.waterfall([task, unlockTask]);
-    var retryTask = promisen.waterfall([wait(interval), checkTask, singleTask]);
+  function throttle(task, concurrency, timeout) {
+    if (!concurrency) concurrency = 1;
+    task = promisen(task);
+    var queue = singleTask.queue = [];
+    var running = singleTask.running = [];
+    var serial = 0;
     return singleTask;
 
     function singleTask(value) {
-      if (singleTask.locked) {
-        // locked
-        return retryTask.call(this, value);
-      } else {
-        // unlocked
-        singleTask.locked = new Date();
-        return mainTask.call(this, value);
-      }
+      var that = this;
+      var args = arguments;
+      var Promise = promisen.Promise;
+      var seq = ++serial;
+
+      return new Promise(function(resolve, reject) {
+        queue.push(job);
+        var timer = timeout && setTimeout(onTimeout, timeout);
+        next();
+
+        function job() {
+          if (timer) clearTimeout(timer);
+          running[seq] = true;
+          task.apply(that, args).then(onResolve, onReject);
+        }
+
+        function onTimeout() {
+          onReject(new Error("timeout: " + timeout + "ms"));
+        }
+
+        function onResolve(value) {
+          delete running[seq];
+          setTimeout(next, 0);
+          resolve(value);
+        }
+
+        function onReject(value) {
+          delete running[seq];
+          setTimeout(next, 0);
+          reject(value);
+        }
+      });
     }
 
-    function unlockTask(value) {
-      delete singleTask.locked;
-      return value;
+    function next() {
+      if (Object.keys(running).length >= concurrency) return;
+      var job = queue.pop();
+      if (job) job();
     }
+  }
 
-    function checkTask(value) {
-      if (!singleTask.locked) return value;
-      var duration = new Date() - singleTask.locked;
-      if (duration < timeout) return value;
+  /**
+   * creates a promise-returning function which has timeout detection until job done.
+   *
+   * @class promisen
+   * @static
+   * @function timeout
+   * @param task {Function} the job
+   * @param msec {Number} timeout in millisecond until job done (default: no timeout)
+   * @returns {Function} promise-returning function
+   */
 
-      // force unlock as timeout
-      delete singleTask.locked;
+  function timeout(task, msec) {
+    task = promisen(task);
+    return timeoutTask;
 
-      // reject the current job
-      var mess = "timeout";
-      if (task.name) mess += " for " + task.name;
-      mess += ": " + Math.round(duration) + " msec exceeded";
-      return reject(Error(mess));
+    function timeoutTask(value) {
+      var that = this;
+      var args = arguments;
+      var Promise = promisen.Promise;
+
+      return new Promise(function(resolve, reject) {
+        var timer = setTimeout(onTimeout, msec);
+        task.apply(that, args).then(onResolve, onReject);
+
+        function onTimeout() {
+          var _reject = reject;
+          resolve = reject = NOP;
+          _reject(new Error("timeout: " + msec + "ms"));
+        }
+
+        function onResolve(value) {
+          clearTimeout(timer);
+          resolve(value);
+        }
+
+        function onReject(value) {
+          clearTimeout(timer);
+          reject(value);
+        }
+      });
     }
   }
 
