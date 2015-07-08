@@ -1,4 +1,4 @@
-# promisen.js
+# promisen.js [![Build Status](https://travis-ci.org/kawanet/promisen.svg?branch=master)](https://travis-ci.org/kawanet/promisen)
 
 promisen.js creates promise-returning functions. ready for ES6 Promise.
 
