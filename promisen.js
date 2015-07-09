@@ -125,12 +125,18 @@
 
     // return the constant value
     function constant() {
-      return promisen.Promise.resolve(task);
+      return resolve(task);
     }
 
     // return a result from the function
     function executable(value) {
-      return promisen.Promise.resolve(task.call(this, value));
+      var result;
+      try {
+        result = resolve(task.apply(this, arguments));
+      } catch (e) {
+        result = reject(e);
+      }
+      return result;
     }
   }
 
@@ -804,18 +810,16 @@
    */
 
   function nodeify(task) {
-    if (!(task instanceof Function)) task = promisen(task);
+    task = promisen(task);
     return nodeifyTask;
 
     function nodeifyTask(args, callback) {
       args = Array.prototype.slice.call(arguments);
       callback = (args[args.length - 1] instanceof Function) && args.pop();
       if (!callback) callback = NOP;
-      return task.apply(this, args).then(onResolve, callback);
-
-      function onResolve(value) {
-        callback(null, value);
-      }
+      var onResolve = callback.bind(this, null);
+      var onReject = callback.bind(this);
+      task.apply(this, args).then(onResolve, onReject);
     }
   }
 

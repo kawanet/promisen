@@ -150,6 +150,24 @@ describe(TESTNAME + " testing", function() {
       }));
     });
   });
+
+  describe("throw error:", function() {
+    it("promisen(syncThrow)().catch()", function(done) {
+      promisen(syncThrow)().then(function(value) {
+        done("should not success");
+      }).catch(wrap(done, function(reason) {
+        assert.ok(reason);
+      }));
+    });
+
+    it("promisen(asyncThrow)().catch()", function(done) {
+      promisen(asyncThrow)().then(function(value) {
+        done("should not success");
+      }).catch(wrap(done, function(reason) {
+        assert.ok(reason);
+      }));
+    });
+  });
 });
 
 function bind_target(array) {
@@ -172,6 +190,15 @@ function async_function(value) {
 
 function resolve_function(value) {
   return Promise.resolve(value);
+}
+
+function syncThrow() {
+  throw new Error("sync throw");
+}
+function asyncThrow() {
+  return new Promise(function() {
+    throw new Error("async throw");
+  });
 }
 
 function typestr(tvalue) {

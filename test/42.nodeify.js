@@ -48,6 +48,22 @@ describe(TESTNAME + " testing", function() {
         assert.ok(!res);
       }));
     });
+
+    it("promisen.nodeify(syncThrow)", function(done) {
+      var task = promisen.nodeify(syncThrow);
+      task("BAZ", wrap(done, function(err, res) {
+        assert.ok(err);
+        assert.ok(!res);
+      }));
+    });
+
+    it("promisen.nodeify(asyncThrow)", function(done) {
+      var task = promisen.nodeify(asyncThrow);
+      task("QUUX", wrap(done, function(err, res) {
+        assert.ok(err);
+        assert.ok(!res);
+      }));
+    });
   });
 
   describe("denodeify():", function() {
@@ -81,6 +97,13 @@ describe(TESTNAME + " testing", function() {
     it("promisen.denodeify(reject3)", function(done) {
       var task = promisen.denodeify(reject3);
       task("A", "B", "C").then(done, wrap(done, function(reason) {
+        assert.ok(reason);
+      }));
+    });
+
+    it("promisen.denodeify(syncThrow)", function(done) {
+      var task = promisen.denodeify(syncThrow);
+      task("QUX").then(done, wrap(done, function(reason) {
         assert.ok(reason);
       }));
     });
@@ -141,6 +164,16 @@ function resolve1(value) {
 function reject1(value) {
   return new Promise(function(resolve, reject) {
     reject(value);
+  });
+}
+
+function syncThrow() {
+  throw new Error("sync error");
+}
+
+function asyncThrow() {
+  return new Promise(function(resolve, reject) {
+    throw new Error("async error");
   });
 }
 
