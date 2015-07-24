@@ -40,5 +40,16 @@
     "q": "^1.4.1",
     "rsvp": "^3.0.18",
     "uglify-js": "^2.4.23"
+  },
+  "jshintConfig": {
+    "eqnull": true,
+    "undef": true,
+    "node": true,
+    "mocha": true,
+    "shadow": true,
+    "globals": {
+      "window": true,
+      "Promise": true
+    }
   }
 }

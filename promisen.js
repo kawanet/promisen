@@ -9,8 +9,6 @@
  */
 
 (function(module, window) {
-  /*jshint eqnull:true */
-
   // node.js
   if (module) module.exports = promisen;
 
