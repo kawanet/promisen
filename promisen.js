@@ -50,6 +50,8 @@
    */
 
   promisen.Promise = polyfill ? require("es6-promise").Promise : Promise;
+  promisen.resolve = resolve;
+  promisen.reject = reject;
 
   // methods
   promisen.waterfall = waterfall;
@@ -138,12 +140,30 @@
     }
   }
 
+  /**
+   * returns a Promise object which is resolved as same as Promise.resolve() does.
+   *
+   * @class promisen
+   * @static
+   * @function resolve
+   * @param value - an argument to be resolved
+   */
+
   function resolve(value) {
     return promisen.Promise.resolve(value);
   }
 
-  function reject(value) {
-    return promisen.Promise.reject(value);
+  /**
+   * returns a Promise object which is rejected as same as Promise.reject() does.
+   *
+   * @class promisen
+   * @static
+   * @function reject
+   * @param reason - reason why this Promise rejected
+   */
+
+  function reject(reason) {
+    return promisen.Promise.reject(reason);
   }
 
   /**
