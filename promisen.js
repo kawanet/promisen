@@ -884,27 +884,34 @@
   function memoize(task, expire, hasher) {
     var memo = memoizeTask.memo = {};
     expire -= 0;
-    var expiry = {};
+    var timers = {};
     if (!hasher) hasher = JSON.stringify.bind(JSON);
     return memoizeTask;
 
     function memoizeTask(value) {
       return waterfall([hasher, readCache]).call(this, value);
 
+      // read previous result from cache
       function readCache(hash) {
-        if (hash in expiry) {
-          if (expiry[hash] < new Date()) {
-            delete expiry[hash];
-            delete memo[hash];
-          }
-        }
         if (hash in memo) return memo[hash];
         return waterfall([task, writeCache]).call(this, value);
 
+        // write new result to cache
         function writeCache(result) {
-          if (expire) expiry[hash] = new Date() - 0 + expire;
           result = memo[hash] = resolve(result);
+          if (expire) {
+            // cancel previous timer
+            if (timers[hash]) clearTimeout(timers[hash]);
+            // add new timer
+            timers[hash] = setTimeout(clearCache, expire);
+          }
           return result;
+        }
+
+        // clear expired result
+        function clearCache() {
+          delete memo[hash];
+          delete timers[hash];
         }
       }
     }

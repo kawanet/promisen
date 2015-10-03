@@ -39,7 +39,7 @@ describe(TESTNAME + " testing", function() {
       })).catch(done);
     });
 
-    it("promisen.memoize(task, timeout)", function(done) {
+    it("promisen.memoize(task, expire)", function(done) {
       task = promisen.memoize(seq(0), 50);
       task = promisen.eachSeries(TVALUES, task);
       task = promisen.waterfall([task, promisen.wait(100), task]);
@@ -51,7 +51,7 @@ describe(TESTNAME + " testing", function() {
         });
       })).catch(done);
     });
-    
+
     it("promisen.memoize(task, null, hasher)", function(done) {
       task = promisen.memoize(seq(0), null, hasher);
       promisen.eachSeries(TVALUES, task)().then(wrap(done, function(array) {
