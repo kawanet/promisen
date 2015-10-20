@@ -1,6 +1,6 @@
 {
   "name": "promisen",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "promisen.js creates promise-returning functions. ready for ES6 Promise.",
   "main": "promisen.js",
   "scripts": {
@@ -28,18 +28,18 @@
   ],
   "homepage": "https://github.com/kawanet/promisen",
   "dependencies": {
-    "es6-promise": "^2.3.0"
+    "es6-promise": "^3.0.2"
   },
   "devDependencies": {
-    "bluebird": "^2.9.30",
-    "jsdoc": "^3.3.2",
+    "bluebird": "^2.10.2",
+    "jsdoc": "^3.3.3",
     "jshint": "^2.8.0",
-    "lie": "^2.9.1",
-    "mocha": "^2.2.5",
+    "lie": "^3.0.1",
+    "mocha": "^2.3.3",
     "promiscuous": "^0.6.0",
     "q": "^1.4.1",
-    "rsvp": "^3.0.18",
-    "uglify-js": "^2.4.23"
+    "rsvp": "^3.1.0",
+    "uglify-js": "^2.5.0"
   },
   "jshintConfig": {
     "eqnull": true,
