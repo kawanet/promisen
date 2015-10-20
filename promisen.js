@@ -709,7 +709,7 @@
    * @example
    * var promisen = require("promisen");
    *
-   * var serialAjaxTask = promisen.single(ajaxTask, 10000, 1); // 10 seconds, 1 worker
+   * var serialAjaxTask = promisen.throttle(ajaxTask, 1, 10000); // 1 worker, 10 seconds
    *
    * serialAjaxTask(req).then(function(res) {...});
    */
