@@ -1,32 +1,11 @@
 {
   "name": "promisen",
-  "version": "0.1.1",
   "description": "promisen.js creates promise-returning functions. ready for ES6 Promise.",
-  "main": "promisen.js",
-  "scripts": {
-    "build": "make",
-    "test": "make test"
-  },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/kawanet/promisen.git"
-  },
+  "version": "0.1.1",
   "author": "@kawanet",
-  "license": "MIT",
   "bugs": {
     "url": "https://github.com/kawanet/promisen/issues"
   },
-  "keywords": [
-    "promise",
-    "q",
-    "bluebird",
-    "kew",
-    "rsvp",
-    "nodeify",
-    "denodeify",
-    "async"
-  ],
-  "homepage": "https://github.com/kawanet/promisen",
   "dependencies": {
     "es6-promise": "^3.0.2"
   },
@@ -41,15 +20,36 @@
     "rsvp": "^3.1.0",
     "uglify-js": "^2.5.0"
   },
+  "homepage": "https://github.com/kawanet/promisen",
   "jshintConfig": {
     "eqnull": true,
-    "undef": true,
-    "node": true,
-    "mocha": true,
-    "shadow": true,
     "globals": {
       "window": true,
       "Promise": true
-    }
+    },
+    "mocha": true,
+    "node": true,
+    "shadow": true,
+    "undef": true
+  },
+  "keywords": [
+    "async",
+    "bluebird",
+    "denodeify",
+    "kew",
+    "nodeify",
+    "promise",
+    "q",
+    "rsvp"
+  ],
+  "license": "MIT",
+  "main": "promisen.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/kawanet/promisen.git"
+  },
+  "scripts": {
+    "build": "make",
+    "test": "make test"
   }
 }
